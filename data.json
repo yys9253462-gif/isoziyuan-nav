@@ -1,0 +1,111 @@
+[
+  {
+    "id": "ai-services",
+    "name": "AI 平台与中转服务",
+    "icon": "Sparkles",
+    "items": [
+      {
+        "name": "Sub2API 智能中转站",
+        "desc": "高可用大模型 API 中转分发网关，支持 Gemini / OpenAI 等主流平台",
+        "url": "https://gpt.isoziyuan.com",
+        "tags": ["API 网关", "反向代理", "聚合分发"],
+        "badge": "核心",
+        "color": "#6366f1"
+      },
+      {
+        "name": "AI 拼车服务中心",
+        "desc": "ChatGPT / Claude / Gemini 账号拼车履约与配额实时状态监控",
+        "url": "https://carpool.isoziyuan.com",
+        "tags": ["账号拼车", "配额看板", "实时监控"],
+        "badge": "常用",
+        "color": "#10b981"
+      },
+      {
+        "name": "Prompt Studio 提示词工作台",
+        "desc": "AI 提示词工程可视化构建与优化工具，提升大模型产出质量",
+        "url": "https://tsc.ailxw.com",
+        "tags": ["提示词工程", "效率工具", "创作辅助"],
+        "badge": "生产力",
+        "color": "#8b5cf6"
+      },
+      {
+        "name": "视频分镜规划器",
+        "desc": "智能电商与自媒体视频分镜脚本规划生成工作流",
+        "url": "https://flow.ailxw.com",
+        "tags": ["视频生成", "分镜规划", "脚本工作流"],
+        "badge": "视频",
+        "color": "#ec4899"
+      }
+    ]
+  },
+  {
+    "id": "content-community",
+    "name": "内容与社区中心",
+    "icon": "MessageSquare",
+    "items": [
+      {
+        "name": "爱搜资源 (主站)",
+        "desc": "优质资源整合与服务门户入口",
+        "url": "https://isoziyuan.com",
+        "tags": ["官方主站", "资源门户", "聚合入口"],
+        "badge": "主站",
+        "color": "#2563eb"
+      },
+      {
+        "name": "独立博客 (Blog)",
+        "desc": "技术文章、教程指南与数字产品资讯沉淀",
+        "url": "https://blog.isoziyuan.com",
+        "tags": ["技术专栏", "干货教程", "资讯"],
+        "badge": "精选",
+        "color": "#0ea5e9"
+      },
+      {
+        "name": "资源交流社区 (Forum)",
+        "desc": "基于 Flarum 构建的高颜值讨论社区，互动与交流中心",
+        "url": "https://forum.isoziyuan.com",
+        "tags": ["Flarum", "讨论社区", "用户互动"],
+        "badge": "社区",
+        "color": "#f97316"
+      }
+    ]
+  },
+  {
+    "id": "tools-ecommerce",
+    "name": "数字商店与工具",
+    "icon": "Code2",
+    "items": [
+      {
+        "name": "自营数字商城 (Shop)",
+        "desc": "数字产品、会员服务与自动化履约独立商城",
+        "url": "https://shop.isoziyuan.com",
+        "tags": ["数字商城", "自动发货", "在线支付"],
+        "badge": "自营",
+        "color": "#f59e0b"
+      },
+      {
+        "name": "收银台与支付后台 (Pay)",
+        "desc": "统一支付回调网关与多渠道收银控制面板",
+        "url": "https://pay.isoziyuan.com",
+        "tags": ["支付网关", "账单结算", "履约调度"],
+        "badge": "支付",
+        "color": "#ef4444"
+      },
+      {
+        "name": "全网实时热点榜 (Hot)",
+        "desc": "多平台热搜与全网趋势实时聚合看板，洞察最新热点动向",
+        "url": "https://hot.isoziyuan.com",
+        "tags": ["全网热点", "多平台聚合", "趋势大盘"],
+        "badge": "热榜",
+        "color": "#e11d48"
+      },
+      {
+        "name": "私有网盘服务 (Pan)",
+        "desc": "高速私有云存储与大文件下载分发空间",
+        "url": "https://pan.isoziyuan.com",
+        "tags": ["文件存储", "高速直链", "云端同步"],
+        "badge": "网盘",
+        "color": "#059669"
+      }
+    ]
+  }
+]
