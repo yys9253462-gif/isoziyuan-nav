@@ -1,5 +1,8 @@
 let navData = [];
 
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[char]));
+const safeColor = (value) => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : '#6366f1';
+
 // 初始化图标映射 (简化 SVG)
 const ICONS = {
   MessageSquare: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
@@ -14,9 +17,9 @@ const ICONS = {
 function renderSidebar() {
   const container = document.getElementById('nav-links');
   container.innerHTML = navData.map(cat => `
-    <a href="#cat-${cat.id}" class="nav-item">
+    <a href="#cat-${escapeHtml(cat.id)}" class="nav-item">
       ${ICONS[cat.icon] || ''}
-      <span>${cat.name}</span>
+      <span>${escapeHtml(cat.name)}</span>
     </a>
   `).join('');
 }
@@ -43,20 +46,20 @@ function renderContent(filterText = '') {
     const cardsHtml = matchedItems.map(item => `
       <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="tool-card">
         <div class="card-top">
-          <div class="tool-avatar" style="background: ${item.color || '#6366f1'}">
-            ${item.name.charAt(0)}
+          <div class="tool-avatar" style="background: ${safeColor(item.color)}">
+            ${escapeHtml(item.name.charAt(0))}
           </div>
           <div class="tool-info">
             <div class="tool-name-row">
-              <span class="tool-name">${item.name}</span>
-              ${item.badge ? `<span class="tool-badge">${item.badge}</span>` : ''}
+              <span class="tool-name">${escapeHtml(item.name)}</span>
+              ${item.badge ? `<span class="tool-badge">${escapeHtml(item.badge)}</span>` : ''}
             </div>
           </div>
         </div>
-        <div class="tool-desc">${item.desc}</div>
+        <div class="tool-desc">${escapeHtml(item.desc)}</div>
         <div class="tool-footer">
           <div class="tag-list">
-            ${(item.tags || []).map(tag => `<span class="tag-item">${tag}</span>`).join('')}
+            ${(item.tags || []).map(tag => `<span class="tag-item">${escapeHtml(tag)}</span>`).join('')}
           </div>
           <svg class="link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l9.2-9.2M17 17V8H8"/></svg>
         </div>
@@ -135,8 +138,13 @@ function initMobileMenu() {
 }
 
 // 启动
-fetch('data.json')
-  .then(res => res.json())
+fetch('/api/nav')
+  .then(res => res.ok ? res.json() : Promise.reject(new Error('API unavailable')))
+  .then(result => {
+    if (!result.success || !Array.isArray(result.data) || result.data.length === 0) throw new Error('No database data');
+    return result.data;
+  })
+  .catch(() => fetch('data.json').then(res => res.json()))
   .then(data => {
     navData = data;
     renderSidebar();

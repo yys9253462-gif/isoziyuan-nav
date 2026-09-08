@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "isoziyuan-nav",
+  "pages_build_output_dir": ".",
+  "compatibility_date": "2026-08-20",
+  "d1_databases": [
+    {
+      "binding": "NAV_DB",
+      "database_name": "isoziyuan-nav-db",
+      "database_id": "9cda72c3-14f7-492d-9d4b-ffe7da52afc0"
+    }
+  ]
+}
