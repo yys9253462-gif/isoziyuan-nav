@@ -174,8 +174,8 @@ export async function saveContact(db, input) {
 function normalizeIcon(value) {
   const icon = String(value || "").trim();
   if (!icon) return "";
-  if (icon.length > 380000 || !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(icon)) {
-    throw new Error("自定义图标必须是 PNG、JPG 或 WebP 图片，且不能超过 280 KB");
+  if (icon.length > 500000 || !/^data:image\/(png|jpeg|webp|svg\+xml|x-icon);base64,[A-Za-z0-9+/=\s]+$/i.test(icon)) {
+    throw new Error("自定义图标必须是 PNG、JPG、WebP、SVG 或 ICO 格式，且不能超过 350 KB");
   }
   return icon;
 }

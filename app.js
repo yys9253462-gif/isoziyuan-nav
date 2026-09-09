@@ -173,9 +173,10 @@ function renderContact() {
       link.href = `mailto:${value}`;
       link.textContent = value;
       row.appendChild(link);
-    } else if (type === 'telegram' && /^https?:\/\//i.test(value)) {
+    } else if (type === 'telegram') {
+      const tgUrl = /^https?:\/\//i.test(value) ? value : `https://t.me/${value.replace(/^@/, '')}`;
       const link = document.createElement('a');
-      link.href = value;
+      link.href = tgUrl;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
       link.textContent = value;
