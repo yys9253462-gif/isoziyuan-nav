@@ -20,3 +20,9 @@ CREATE TABLE IF NOT EXISTS nav_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_nav_items_category_order ON nav_items(category_id, sort_order);
+
+CREATE TABLE IF NOT EXISTS site_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL DEFAULT '',
+  updated_at INTEGER NOT NULL DEFAULT 0
+);

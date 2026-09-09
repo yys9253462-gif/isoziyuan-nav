@@ -1,53 +1,85 @@
-<!doctype html>
-<html lang="zh-CN" data-theme="dark">
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>导航后台管理 - 爱搜资源</title>
-  <style>
-    :root{color-scheme:dark;--bg:#0b0f14;--panel:#151b23;--panel2:#1c2530;--line:#2a3542;--text:#edf3fb;--muted:#8e9aaa;--accent:#6ea8fe;--danger:#ff6b6b;--ok:#55d187}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
-    .icon-preview{display:flex;align-items:center;gap:10px;min-height:46px;margin-top:7px;color:var(--muted)}.icon-preview img{width:44px;height:44px;border-radius:10px;object-fit:cover;background:#0f141b;border:1px solid var(--line)}
-    .wrap{max-width:1180px;margin:0 auto;padding:28px 20px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.top h1{font-size:23px;margin:0}.top p{color:var(--muted);margin:5px 0 0}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px}.login{max-width:420px;margin:90px auto}.hidden{display:none!important}.field{display:grid;gap:6px;margin:12px 0}.field label{color:var(--muted)}input,textarea,select{width:100%;border:1px solid var(--line);border-radius:7px;background:#0f141b;color:var(--text);padding:10px;font:inherit}textarea{min-height:88px;resize:vertical}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:7px;padding:9px 13px;cursor:pointer;font:inherit}button:hover{border-color:var(--accent)}button.primary{background:#2563eb;border-color:#3b82f6}button.danger{color:#ff9a9a}button:disabled{opacity:.55;cursor:not-allowed}.layout{display:grid;grid-template-columns:290px 1fr;gap:18px}.status{min-height:22px;color:var(--muted);margin:10px 0}.status.ok{color:var(--ok)}.status.error{color:var(--danger)}.category-list{display:grid;gap:7px;margin-top:14px}.category{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px;border:1px solid transparent;border-radius:7px;cursor:pointer}.category:hover,.category.active{background:var(--panel2);border-color:var(--line)}.category small{color:var(--muted)}.section-title{font-size:16px;margin:0 0 12px}.item-list{display:grid;gap:8px;margin-top:20px}.item{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:8px;background:#10161e}.item strong{display:block}.item span{display:block;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.item-actions{display:flex;gap:6px}.hint{color:var(--muted);font-size:12px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:18px}.empty{color:var(--muted);padding:16px 0}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:760px){.layout{grid-template-columns:1fr}.two{grid-template-columns:1fr}.wrap{padding:18px 12px}.top{align-items:flex-start;gap:10px}.top button{white-space:nowrap}}
-  </style>
+  <title>导航站后台管理</title>
+  <link rel="stylesheet" href="admin.css?v=1">
 </head>
-<body>
-  <main class="wrap">
-    <section id="login-panel" class="panel login">
-      <h1>导航后台登录</h1><p class="hint">仅用于管理 isoziyuan-nav 导航内容</p>
-      <form id="login-form">
-        <div class="field"><label for="username">管理员账号</label><input id="username" autocomplete="username" value="admin" required></div>
-        <div class="field"><label for="password">管理员密码</label><input id="password" type="password" autocomplete="current-password" required></div>
-        <button class="primary" type="submit">登录后台</button><div id="login-status" class="status"></div>
+<body class="admin-page">
+  <section id="login-panel" class="auth-screen">
+    <div class="auth-glow"></div>
+    <div class="auth-card">
+      <div class="brand-mark">☁</div>
+      <p class="eyebrow">ISOZIYUAN NAV</p>
+      <h1>导航站控制台</h1>
+      <p class="auth-subtitle">管理分类、网站入口和联系信息</p>
+      <form id="login-form" class="stack-form">
+        <label>管理员账号<input id="username" autocomplete="username" placeholder="默认：admin"></label>
+        <label>管理密码<input id="password" type="password" autocomplete="current-password" required placeholder="请输入管理密码"></label>
+        <button class="primary-btn full-btn" type="submit">进入控制台</button>
       </form>
-    </section>
+      <p id="login-status" class="status"></p>
+      <a class="back-link" href="/">← 返回导航首页</a>
+    </div>
+  </section>
 
-    <section id="admin-panel" class="hidden">
-      <header class="top"><div><h1>导航后台管理</h1><p>管理分类、网站链接、标签和展示顺序</p></div><button id="logout">退出登录</button></header>
-      <div class="layout">
-        <aside class="panel">
-          <h2 class="section-title">分类管理</h2>
-          <div class="field"><label for="category-name">分类名称</label><input id="category-name" placeholder="例如：AI 工具"></div>
-          <div class="actions"><button id="add-category" class="primary">新增分类</button><button id="rename-category">重命名</button><button id="delete-category" class="danger">删除分类</button></div>
+  <section id="admin-panel" class="dashboard hidden">
+    <aside class="admin-sidebar">
+      <div class="admin-brand"><div class="brand-mark small">☁</div><div><strong>爱搜云导航</strong><span>管理控制台</span></div></div>
+      <div class="sidebar-section-title">工作区</div>
+      <a class="sidebar-link active" href="#overview">▦ <span>导航内容</span></a>
+      <a class="sidebar-link" href="#contact-settings">✦ <span>联系方式</span></a>
+      <div class="sidebar-tip"><strong>小提示</strong><span>修改内容后点击右上角“保存全部”，即可同步到线上首页。</span></div>
+      <div class="sidebar-bottom"><a class="sidebar-link" href="/" target="_blank" rel="noopener">↗ <span>打开网站</span></a><button id="logout" class="logout-btn" type="button">退出登录</button></div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="dashboard-header" id="overview">
+        <div><p class="eyebrow">CONTENT CENTER</p><h1>导航内容</h1><p class="page-subtitle">在这里管理网站分类、入口和移动端联系信息。</p></div>
+        <button id="save-all" class="primary-btn save-btn" type="button">✓ 保存全部</button>
+      </header>
+
+      <div class="metrics-grid">
+        <div class="metric-card"><span>分类数量</span><strong id="metric-categories">0</strong><small>导航首页的内容分组</small></div>
+        <div class="metric-card"><span>网站入口</span><strong id="metric-items">0</strong><small>所有分类中的网站总数</small></div>
+        <div class="metric-card accent-card"><span>发布状态</span><strong>在线</strong><small>保存后立即更新首页</small></div>
+      </div>
+
+      <div class="workspace-grid">
+        <section class="panel categories-panel">
+          <div class="panel-heading"><div><span class="panel-kicker">01 / CATEGORIES</span><h2>分类管理</h2></div><span class="panel-count" id="category-count">0</span></div>
+          <div class="category-tools"><input id="category-name" placeholder="输入分类名称"><div class="button-row"><button id="add-category" class="primary-btn" type="button">＋新增</button><button id="rename-category" class="ghost-btn" type="button">重命名</button><button id="delete-category" class="danger-btn" type="button">删除</button></div></div>
           <div id="category-list" class="category-list"></div>
-        </aside>
-        <section class="panel">
-          <div class="toolbar"><div><h2 class="section-title">网站管理</h2><div id="selected-category" class="hint">请选择一个分类</div></div><button id="save-all" class="primary">保存全部修改</button></div>
-          <form id="item-form">
-            <input id="item-id" type="hidden">
-            <div class="two"><div class="field"><label for="item-name">网站名称</label><input id="item-name" required></div><div class="field"><label for="item-url">网站链接</label><input id="item-url" type="url" placeholder="https://example.com" required></div></div>
-            <div class="field"><label for="item-desc">网站描述</label><textarea id="item-desc" placeholder="一句话介绍这个网站"></textarea></div>
-            <div class="two"><div class="field"><label for="item-tags">标签（用逗号分隔）</label><input id="item-tags" placeholder="AI, 工具, 推荐"></div><div class="field"><label for="item-badge">徽标</label><input id="item-badge" placeholder="精选"></div></div>
-            <div class="field"><label for="item-color">卡片颜色</label><input id="item-color" type="color" value="#6366f1"></div>
-            <div class="field"><label for="item-icon">自定义导航图标（可选）</label><input id="item-icon" type="file" accept="image/png,image/jpeg,image/webp"><div id="item-icon-preview" class="icon-preview">未设置自定义图标</div><div class="hint">支持 PNG、JPG、WebP，最大 280 KB；不上传则显示网站首字母。</div></div>
-            <div class="actions"><button class="primary" type="submit">保存网站</button><button id="clear-item" type="button">清空表单</button></div>
-          </form>
+        </section>
+
+        <section class="panel items-panel">
+          <div class="panel-heading"><div><span class="panel-kicker">02 / LINKS</span><h2>网站入口</h2><p id="selected-category" class="panel-note">请选择一个分类</p></div><span class="panel-count" id="item-count">0</span></div>
           <div id="item-list" class="item-list"></div>
-          <div id="admin-status" class="status"></div>
+          <div class="item-editor-wrap">
+            <div class="editor-title"><span>编辑网站</span><small>支持本地图标上传</small></div>
+            <form id="item-form" class="item-form">
+              <input id="item-id" type="hidden">
+              <div class="form-grid two"><label>网站名称<input id="item-name" required placeholder="例如：Cloudflare"></label><label>网站链接<input id="item-url" type="url" required placeholder="https://..."></label></div>
+              <label>简介<textarea id="item-desc" rows="2" placeholder="用一句话介绍这个网站"></textarea></label>
+              <div class="form-grid three"><label>标签<input id="item-tags" placeholder="AI, 工具"></label><label>徽章<input id="item-badge" placeholder="推荐"></label><label>主题色<input id="item-color" type="color" value="#6366f1"></label></div>
+              <div class="icon-picker"><label>自定义图标<input id="item-icon" type="file" accept="image/png,image/jpeg,image/webp"></label><div id="item-icon-preview" class="icon-preview">未设置自定义图标</div></div>
+              <div class="button-row"><button class="primary-btn" type="submit">保存网站</button><button id="clear-item" class="ghost-btn" type="button">清空表单</button></div>
+            </form>
+          </div>
         </section>
       </div>
-    </section>
-  </main>
-  <script src="admin.js"></script>
+
+      <section class="panel contact-panel" id="contact-settings">
+        <div class="panel-heading"><div><span class="panel-kicker">03 / CONTACT</span><h2>联系方式</h2><p class="panel-note">开启后，手机端底部“联系”标签会显示联系卡片。</p></div><label class="switch-label"><input id="contact-enabled" type="checkbox"><span class="switch"></span><span>显示联系入口</span></label></div>
+        <div class="form-grid two"><label>标题<input id="contact-title" maxlength="60" placeholder="联系站长"></label><label>说明文字<input id="contact-description" maxlength="240" placeholder="需要合作或资源交流，欢迎联系。"></label></div>
+        <div class="form-grid four contact-fields"><label>邮箱<input id="contact-email" type="email" placeholder="hello@example.com"></label><label>微信<input id="contact-wechat" placeholder="微信号"></label><label>QQ<input id="contact-qq" placeholder="QQ号"></label><label>Telegram<input id="contact-telegram" placeholder="用户名或 https://t.me/... "></label></div>
+        <div class="contact-note">填写后点击右上角“保存全部”。邮箱和 Telegram 链接会在网站上自动变成可点击入口。</div>
+      </section>
+
+      <p id="admin-status" class="status"></p>
+    </main>
+  </section>
+  <script src="admin.js?v=2"></script>
 </body>
 </html>

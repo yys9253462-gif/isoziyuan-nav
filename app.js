@@ -1,8 +1,14 @@
 let navData = [];
+let contact = defaultContact();
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[char]));
 const safeColor = (value) => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : '#6366f1';
 const safeIcon = (value) => /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(value || '')) ? value : '';
+function defaultContact() { return { enabled: false, title: '联系站长', description: '需要合作或资源交流，欢迎联系。', email: '', wechat: '', qq: '', telegram: '' }; }
+function normalizeContact(value) {
+  const raw = value && typeof value === 'object' ? value : {};
+  return { enabled: Boolean(raw.enabled), title: String(raw.title || '联系站长').slice(0, 60), description: String(raw.description || '需要合作或资源交流，欢迎联系。').slice(0, 240), email: String(raw.email || '').slice(0, 160), wechat: String(raw.wechat || '').slice(0, 80), qq: String(raw.qq || '').slice(0, 40), telegram: String(raw.telegram || '').slice(0, 200) };
+}
 
 // 初始化图标映射 (简化 SVG)
 const ICONS = {
@@ -68,10 +74,10 @@ function renderContent(filterText = '') {
     `).join('');
 
     return `
-      <section id="cat-${cat.id}" class="category-section">
+      <section id="cat-${escapeHtml(cat.id)}" class="category-section">
         <div class="category-header">
           ${ICONS[cat.icon] || ''}
-          <h2 class="category-title">${cat.name}</h2>
+          <h2 class="category-title">${escapeHtml(cat.name)}</h2>
           <span class="category-count">${matchedItems.length}</span>
         </div>
         <div class="tools-grid">
@@ -127,14 +133,83 @@ function initSearch() {
 function initMobileMenu() {
   const btn = document.getElementById('mobile-menu-btn');
   const sidebar = document.getElementById('sidebar');
+  const bottomNav = document.getElementById('mobile-bottom-nav');
   btn.addEventListener('click', () => {
     sidebar.classList.toggle('open');
   });
 
   document.addEventListener('click', (e) => {
+    if (bottomNav && bottomNav.contains(e.target)) return;
     if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
       sidebar.classList.remove('open');
     }
+  });
+}
+
+function renderContact() {
+  const title = document.getElementById('contact-title');
+  const description = document.getElementById('contact-description');
+  const list = document.getElementById('contact-list');
+  title.textContent = contact.title;
+  description.textContent = contact.description;
+  list.innerHTML = '';
+  const values = [['邮箱', contact.email, 'email'], ['微信', contact.wechat, 'text'], ['QQ', contact.qq, 'text'], ['Telegram', contact.telegram, 'telegram']].filter(([, value]) => value);
+  if (!contact.enabled || values.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'contact-empty';
+    empty.textContent = contact.enabled ? '站长暂未填写联系方式。' : '联系方式暂未开放。';
+    list.appendChild(empty);
+    return;
+  }
+  values.forEach(([label, value, type]) => {
+    const row = document.createElement('div');
+    row.className = 'contact-row';
+    const labelNode = document.createElement('span');
+    labelNode.className = 'contact-label';
+    labelNode.textContent = label;
+    row.appendChild(labelNode);
+    if (type === 'email') {
+      const link = document.createElement('a');
+      link.href = `mailto:${value}`;
+      link.textContent = value;
+      row.appendChild(link);
+    } else if (type === 'telegram' && /^https?:\/\//i.test(value)) {
+      const link = document.createElement('a');
+      link.href = value;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = value;
+      row.appendChild(link);
+    } else {
+      const text = document.createElement('span');
+      text.textContent = value;
+      row.appendChild(text);
+    }
+    list.appendChild(row);
+  });
+}
+
+function initContactModal() {
+  const modal = document.getElementById('contact-modal');
+  const close = () => { modal.hidden = true; };
+  document.getElementById('contact-close').addEventListener('click', close);
+  modal.addEventListener('click', (event) => { if (event.target === modal) close(); });
+  window.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+}
+
+function initMobileBottomNav() {
+  const sidebar = document.getElementById('sidebar');
+  const searchInput = document.getElementById('search-input');
+  const modal = document.getElementById('contact-modal');
+  document.querySelectorAll('[data-mobile-action]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const action = button.dataset.mobileAction;
+      document.querySelectorAll('.bottom-nav-item').forEach((item) => item.classList.toggle('active', item === button));
+      if (action === 'home') { sidebar.classList.remove('open'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      if (action === 'categories') { sidebar.classList.add('open'); }
+      if (action === 'search') { sidebar.classList.remove('open'); searchInput.focus({ preventScroll: true }); searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      if (action === 'contact') { sidebar.classList.remove('open'); modal.hidden = false; }
+    });
   });
 }
 
@@ -143,16 +218,20 @@ fetch('/api/nav')
   .then(res => res.ok ? res.json() : Promise.reject(new Error('API unavailable')))
   .then(result => {
     if (!result.success || !Array.isArray(result.data) || result.data.length === 0) throw new Error('No database data');
-    return result.data;
+    return { data: result.data, contact: result.contact };
   })
-  .catch(() => fetch('data.json').then(res => res.json()))
-  .then(data => {
-    navData = data;
+  .catch(() => fetch('data.json').then(res => res.json()).then(data => ({ data, contact: defaultContact() })))
+  .then(payload => {
+    navData = payload.data;
+    contact = normalizeContact(payload.contact);
     renderSidebar();
     renderContent();
+    renderContact();
     initTheme();
     initSearch();
     initMobileMenu();
+    initContactModal();
+    initMobileBottomNav();
   })
   .catch(err => {
     console.error('加载配置失败:', err);

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" data-page-node-id="FtMuzV0061OIfNJ4oOc57Z">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="JTdhtZDrK8gfpo5jFt59gs">
   <title>服务导航 - 谷歌服务器专属工作台</title>
-  <link rel="stylesheet" href="style.css" data-page-node-id="w4TnDiNmjLY9xPncQeCpWm">
+  <link rel="stylesheet" href="style.css?v=2" data-page-node-id="w4TnDiNmjLY9xPncQeCpWm">
 </head>
 <body data-page-node-id="qXCdMttLYjx7alUxZ0EbmD">
 
@@ -34,6 +34,7 @@
       </div>
 
       <div class="header-actions" data-page-node-id="axKu8T1aljY6c5ixJSnmCy">
+        <button class="contact-top-btn" data-mobile-action="contact" type="button">联系站长</button>
         <button class="theme-toggle-btn" id="theme-toggle" aria-label="切换主题" data-page-node-id="RXKstWpxbznfmGAUuXHvzH">
           <!-- 动态图标 -->
         </button>
@@ -52,6 +53,23 @@
     </div>
   </main>
 
-  <script src="app.js"></script>
+  <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="移动端快捷导航">
+    <button class="bottom-nav-item active" data-mobile-action="home" type="button"><span class="bottom-nav-icon">⌂</span><span>首页</span></button>
+    <button class="bottom-nav-item" data-mobile-action="categories" type="button"><span class="bottom-nav-icon">☷</span><span>分类</span></button>
+    <button class="bottom-nav-item" data-mobile-action="search" type="button"><span class="bottom-nav-icon">⌕</span><span>搜索</span></button>
+    <button class="bottom-nav-item" data-mobile-action="contact" type="button"><span class="bottom-nav-icon">✦</span><span>联系</span></button>
+  </nav>
+
+  <div class="contact-modal" id="contact-modal" hidden>
+    <div class="contact-card" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+      <button class="contact-close" id="contact-close" type="button" aria-label="关闭">×</button>
+      <div class="contact-kicker">CONTACT</div>
+      <h2 id="contact-title">联系站长</h2>
+      <p id="contact-description">需要合作或资源交流，欢迎联系。</p>
+      <div id="contact-list" class="contact-list"></div>
+    </div>
+  </div>
+
+  <script src="app.js?v=2"></script>
 </body>
 </html>

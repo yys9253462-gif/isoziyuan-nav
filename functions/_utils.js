@@ -1,6 +1,15 @@
 const encoder = new TextEncoder();
 const SESSION_COOKIE = "isoziyuan_nav_admin";
 const SESSION_TTL = 60 * 60 * 24 * 7;
+const DEFAULT_CONTACT = {
+  enabled: false,
+  title: "联系站长",
+  description: "需要合作或资源交流，欢迎联系。",
+  email: "",
+  wechat: "",
+  qq: "",
+  telegram: "",
+};
 
 export function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {
@@ -128,6 +137,38 @@ export function normalizeNavData(input) {
       }),
     };
   });
+}
+
+export function normalizeContact(input) {
+  const raw = input && typeof input === "object" ? input : {};
+  const clean = (value, max) => String(value ?? "").trim().slice(0, max);
+  return {
+    enabled: Boolean(raw.enabled),
+    title: clean(raw.title || DEFAULT_CONTACT.title, 60) || DEFAULT_CONTACT.title,
+    description: clean(raw.description || DEFAULT_CONTACT.description, 240) || DEFAULT_CONTACT.description,
+    email: clean(raw.email, 160),
+    wechat: clean(raw.wechat, 80),
+    qq: clean(raw.qq, 40),
+    telegram: clean(raw.telegram, 200),
+  };
+}
+
+export async function loadContact(db) {
+  const row = await db.prepare("SELECT value FROM site_settings WHERE key = 'contact'").first();
+  if (!row?.value) return normalizeContact(DEFAULT_CONTACT);
+  try {
+    return normalizeContact(JSON.parse(row.value));
+  } catch {
+    return normalizeContact(DEFAULT_CONTACT);
+  }
+}
+
+export async function saveContact(db, input) {
+  const contact = normalizeContact(input);
+  await db.prepare("INSERT INTO site_settings (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at")
+    .bind("contact", JSON.stringify(contact), Math.floor(Date.now() / 1000))
+    .run();
+  return contact;
 }
 
 function normalizeIcon(value) {
