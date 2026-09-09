@@ -40,4 +40,32 @@ $("delete-category").addEventListener("click", () => { if (!selectedCategory()) 
 $("item-icon").addEventListener("change", () => { const file = $("item-icon").files[0]; if (!file) return; const allowed = ["image/png", "image/jpeg", "image/webp", "image/svg+xml", "image/x-icon", "image/vnd.microsoft.icon"]; if (!allowed.includes(file.type)) return status("图标仅支持 PNG、JPG、WebP、SVG 或 ICO", true); if (file.size > 350 * 1024) return status("图标不能超过 350 KB", true); const reader = new FileReader(); reader.onload = () => { itemIconData = reader.result; setIconPreview(itemIconData); }; reader.readAsDataURL(file); });
 $("item-form").addEventListener("submit", (event) => { event.preventDefault(); const category = selectedCategory(); if (!category) return status("请先选择分类", true); const item = { id: $("item-id").value || crypto.randomUUID(), name: $("item-name").value.trim(), url: $("item-url").value.trim(), desc: $("item-desc").value.trim(), tags: $("item-tags").value.split(",").map((tag) => tag.trim()).filter(Boolean), badge: $("item-badge").value.trim(), color: $("item-color").value, icon: itemIconData }; if (!item.name || !item.url) return status("网站名称和链接不能为空", true); const index = category.items.findIndex((current) => current.id === item.id); if (index >= 0) category.items[index] = item; else category.items.push(item); clearItem(); render(); status("网站已修改，请点击保存全部修改。"); });
 $("clear-item").addEventListener("click", clearItem);
-$("save-all").addEventListener("click", async () => { try { $("save-all").disabled = true; const result = await api("/api/admin/nav", { method: "PUT", body: JSON.stringify({ data: navData, contact: readContact() }) }); navData = result.data || navData; fillContact(result.contact); render(); status("已保存到 Cloudflare D1，首页已同步更新。"); } catch (error) { status(error.message, true); } finally { $("save-all").disabled = false; } });
+$("save-all").addEventListener("click", async () => {
+  try {
+    $("save-all").disabled = true;
+    const result = await api("/api/admin/nav", {
+      method: "PUT",
+      body: JSON.stringify({ data: navData, contact: readContact() }),
+    });
+    navData = result.data || navData;
+    fillContact(result.contact);
+    render();
+
+    // 广播跨标签实时同步事件给前台
+    try {
+      if ("BroadcastChannel" in window) {
+        const channel = new BroadcastChannel("isoziyuan_nav_sync");
+        channel.postMessage({ type: "NAV_UPDATED", timestamp: Date.now() });
+        channel.close();
+      }
+      localStorage.setItem("nav_last_saved", String(Date.now()));
+    } catch (e) {}
+
+    status("已保存到 Cloudflare D1，首页已实时同步！");
+  } catch (error) {
+    status(error.message, true);
+  } finally {
+    $("save-all").disabled = false;
+  }
+});
+

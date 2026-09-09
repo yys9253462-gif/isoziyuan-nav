@@ -214,26 +214,90 @@ function initMobileBottomNav() {
   });
 }
 
-// 启动
-fetch('/api/nav')
-  .then(res => res.ok ? res.json() : Promise.reject(new Error('API unavailable')))
-  .then(result => {
-    if (!result.success || !Array.isArray(result.data) || result.data.length === 0) throw new Error('No database data');
+// 启动与实时刷新机制
+let isInitialized = false;
+
+async function fetchNavConfig() {
+  const query = `?_t=${Date.now()}`;
+  try {
+    const res = await fetch('/api/nav' + query, { cache: 'no-store' });
+    if (!res.ok) throw new Error('API unavailable');
+    const result = await res.json();
+    if (!result.success || !Array.isArray(result.data) || result.data.length === 0) {
+      throw new Error('No database data');
+    }
     return { data: result.data, contact: result.contact };
-  })
-  .catch(() => fetch('data.json').then(res => res.json()).then(data => ({ data, contact: defaultContact() })))
-  .then(payload => {
-    navData = payload.data;
-    contact = normalizeContact(payload.contact);
-    renderSidebar();
-    renderContent();
-    renderContact();
+  } catch (err) {
+    const data = await fetch('data.json' + query, { cache: 'no-store' }).then(r => r.json());
+    return { data, contact: defaultContact() };
+  }
+}
+
+async function applyNavPayload(payload) {
+  navData = payload.data;
+  contact = normalizeContact(payload.contact);
+  renderSidebar();
+  const searchInput = document.getElementById('search-input');
+  renderContent(searchInput ? searchInput.value : '');
+  renderContact();
+
+  if (!isInitialized) {
+    isInitialized = true;
     initTheme();
     initSearch();
     initMobileMenu();
     initContactModal();
     initMobileBottomNav();
-  })
+    setupLiveSync();
+  }
+}
+
+function setupLiveSync() {
+  // 1. BroadcastChannel 跨标签实时通知
+  if ('BroadcastChannel' in window) {
+    try {
+      const channel = new BroadcastChannel('isoziyuan_nav_sync');
+      channel.onmessage = async (event) => {
+        if (event?.data?.type === 'NAV_UPDATED') {
+          try {
+            const payload = await fetchNavConfig();
+            await applyNavPayload(payload);
+          } catch (e) {
+            console.error('实时更新导航失败:', e);
+          }
+        }
+      };
+    } catch (e) {
+      // 忽略不支持的情况
+    }
+  }
+
+  // 2. Storage 事件跨标签兜底监听
+  window.addEventListener('storage', async (event) => {
+    if (event.key === 'nav_last_saved') {
+      try {
+        const payload = await fetchNavConfig();
+        await applyNavPayload(payload);
+      } catch (e) {
+        console.error('存储同步更新导航失败:', e);
+      }
+    }
+  });
+
+  // 3. 标签页切回前台时，自动比对并拉取最新数据
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible') {
+      try {
+        const payload = await fetchNavConfig();
+        await applyNavPayload(payload);
+      } catch (e) {}
+    }
+  });
+}
+
+fetchNavConfig()
+  .then(applyNavPayload)
   .catch(err => {
     console.error('加载配置失败:', err);
   });
+
