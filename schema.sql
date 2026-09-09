@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS nav_items (
   tags_json TEXT NOT NULL DEFAULT '[]',
   badge TEXT NOT NULL DEFAULT '',
   color TEXT NOT NULL DEFAULT '#6366f1',
+  icon TEXT NOT NULL DEFAULT '',
   sort_order INTEGER NOT NULL DEFAULT 0,
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 );

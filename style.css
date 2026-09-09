@@ -309,6 +309,13 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
+.tool-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
 .tool-info {
   flex: 1;
   min-width: 0;

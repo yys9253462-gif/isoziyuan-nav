@@ -2,6 +2,7 @@ let navData = [];
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[char]));
 const safeColor = (value) => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : '#6366f1';
+const safeIcon = (value) => /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(String(value || '')) ? value : '';
 
 // 初始化图标映射 (简化 SVG)
 const ICONS = {
@@ -47,7 +48,7 @@ function renderContent(filterText = '') {
       <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="tool-card">
         <div class="card-top">
           <div class="tool-avatar" style="background: ${safeColor(item.color)}">
-            ${escapeHtml(item.name.charAt(0))}
+            ${safeIcon(item.icon) ? `<img src="${escapeHtml(item.icon)}" alt="">` : escapeHtml(item.name.charAt(0))}
           </div>
           <div class="tool-info">
             <div class="tool-name-row">

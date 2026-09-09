@@ -121,6 +121,7 @@ export function normalizeNavData(input) {
           tags: Array.isArray(item.tags) ? item.tags.map((tag) => String(tag).trim().slice(0, 40)).filter(Boolean).slice(0, 10) : [],
           badge: String(item.badge || "").trim().slice(0, 40),
           color: /^#[0-9a-f]{6}$/i.test(String(item.color || "")) ? String(item.color) : "#6366f1",
+          icon: normalizeIcon(item.icon),
           _categoryIndex: categoryIndex,
           _itemIndex: itemIndex,
         };
@@ -129,9 +130,18 @@ export function normalizeNavData(input) {
   });
 }
 
+function normalizeIcon(value) {
+  const icon = String(value || "").trim();
+  if (!icon) return "";
+  if (icon.length > 380000 || !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(icon)) {
+    throw new Error("自定义图标必须是 PNG、JPG 或 WebP 图片，且不能超过 280 KB");
+  }
+  return icon;
+}
+
 export async function loadNavData(db) {
   const categories = await db.prepare("SELECT id, name, icon, sort_order FROM categories ORDER BY sort_order, rowid").all();
-  const items = await db.prepare("SELECT id, category_id, name, description, url, tags_json, badge, color, sort_order FROM nav_items ORDER BY sort_order, rowid").all();
+  const items = await db.prepare("SELECT id, category_id, name, description, url, tags_json, badge, color, icon, sort_order FROM nav_items ORDER BY sort_order, rowid").all();
   const byCategory = new Map();
   (categories.results || []).forEach((category) => byCategory.set(category.id, { id: category.id, name: category.name, icon: category.icon, items: [] }));
   (items.results || []).forEach((item) => {
@@ -139,7 +149,7 @@ export async function loadNavData(db) {
     if (!category) return;
     let tags = [];
     try { tags = JSON.parse(item.tags_json || "[]"); } catch { tags = []; }
-    category.items.push({ id: item.id, name: item.name, desc: item.description || "", url: item.url, tags, badge: item.badge || "", color: item.color || "#6366f1" });
+    category.items.push({ id: item.id, name: item.name, desc: item.description || "", url: item.url, tags, badge: item.badge || "", color: item.color || "#6366f1", icon: item.icon || "" });
   });
   return Array.from(byCategory.values());
 }
@@ -150,7 +160,7 @@ export async function saveNavData(db, input) {
   data.forEach((category, categoryIndex) => {
     statements.push(db.prepare("INSERT INTO categories (id, name, icon, sort_order) VALUES (?, ?, ?, ?)").bind(category.id, category.name, category.icon, categoryIndex));
     category.items.forEach((item, itemIndex) => {
-      statements.push(db.prepare("INSERT INTO nav_items (id, category_id, name, description, url, tags_json, badge, color, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(item.id, category.id, item.name, item.desc, item.url, JSON.stringify(item.tags), item.badge, item.color, itemIndex));
+      statements.push(db.prepare("INSERT INTO nav_items (id, category_id, name, description, url, tags_json, badge, color, icon, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(item.id, category.id, item.name, item.desc, item.url, JSON.stringify(item.tags), item.badge, item.color, item.icon, itemIndex));
     });
   });
   await db.batch(statements);
