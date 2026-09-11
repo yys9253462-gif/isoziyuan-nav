@@ -29,7 +29,7 @@ if "%DRYRUN%"=="1" (
     echo   [试运行] 默认使用识别模式 [1]
     goto step_env
 )
-choice /c 12 /t 10 /d 1 /m "请按 1 或 2 (10 秒无操作默认选 1): "
+choice /c 12 /m "请输入选项 [1 或 2]: "
 if errorlevel 2 (
     set AUTH_FORCE=1
     echo   已选择: [2] 全新授权模式
