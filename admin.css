@@ -49,3 +49,16 @@ input:focus,textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px rg
 .contact-panel { margin-top:18px; }.switch-label { display:flex; align-items:center; gap:8px; color:#cbd8eb; font-size:12px; cursor:pointer; }.switch-label input { position:absolute; opacity:0; width:1px; }.switch { position:relative; width:38px; height:22px; border-radius:20px; background:#2b3950; }.switch:after { content:""; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:#93a2b8; transition:.2s; }.switch-label input:checked + .switch { background:#765cf7; }.switch-label input:checked + .switch:after { left:19px; background:#fff; }.contact-note { margin-top:15px; padding:11px 13px; border-radius:10px; background:rgba(117,91,244,.1); color:#aebcdc; font-size:12px; }
 @media (max-width:1000px) { .dashboard { grid-template-columns:1fr; }.admin-sidebar { position:relative; min-height:auto; padding:16px 20px; }.admin-brand { padding-bottom:15px; }.sidebar-section-title,.sidebar-tip { display:none; }.sidebar-link { display:none; }.sidebar-bottom { display:flex; align-items:center; justify-content:space-between; gap:10px; }.sidebar-bottom .sidebar-link { display:flex; }.logout-btn { width:auto; margin:0; }.workspace-grid { grid-template-columns:1fr; } }
 @media (max-width:700px) { .auth-card { padding:30px 22px; }.admin-main { padding:28px 14px 45px; }.dashboard-header { display:block; }.dashboard-header h1 { font-size:28px; }.save-btn { width:100%; margin-top:18px; }.metrics-grid { grid-template-columns:1fr; }.form-grid.two,.form-grid.three,.form-grid.four,.icon-picker { grid-template-columns:1fr; }.categories-panel,.items-panel,.contact-panel { padding:17px; }.panel-heading { display:block; }.panel-count { margin-top:12px; }.switch-label { margin-top:16px; }.item-row { display:block; }.item-actions { margin-top:9px; }.contact-fields { margin-top:14px; } }
+
+/* Tab 视图与吸顶状态条 */
+.tab-pane.hidden { display: none !important; }
+.tab-pane.active { display: block; animation: tabFadeIn .22s ease-out; }
+@keyframes tabFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.status-container { margin-bottom: 20px; }
+.status { display: none; padding: 14px 18px; border-radius: 12px; font-size: 14px; font-weight: 500; }
+.status.ok { display: flex; align-items: center; gap: 8px; background: rgba(34,197,94,.14); border: 1px solid rgba(34,197,94,.38); color: #4ade80; box-shadow: 0 4px 20px rgba(34,197,94,.15); }
+.status.error { display: flex; align-items: center; gap: 8px; background: rgba(239,68,68,.14); border: 1px solid rgba(239,68,68,.38); color: #f87171; box-shadow: 0 4px 20px rgba(239,68,68,.15); }
+
+button.sidebar-link { width: 100%; font: inherit; font-size: 14px; cursor: pointer; text-align: left; }
+

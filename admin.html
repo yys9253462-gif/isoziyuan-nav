@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>导航站后台管理</title>
-  <link rel="stylesheet" href="admin.css?v=1">
+  <link rel="stylesheet" href="admin.css?v=2">
 </head>
 <body class="admin-page">
   <section id="login-panel" class="auth-screen">
@@ -28,81 +28,130 @@
     <aside class="admin-sidebar">
       <div class="admin-brand"><div class="brand-mark small">☁</div><div><strong>爱搜云导航</strong><span>管理控制台</span></div></div>
       <div class="sidebar-section-title">工作区</div>
-      <a class="sidebar-link active" href="#overview">▦ <span>导航内容</span></a>
-      <a class="sidebar-link" href="#site-settings">⚙ <span>站点设置</span></a>
-      <a class="sidebar-link" href="#contact-settings">✦ <span>联系方式</span></a>
+      <button class="sidebar-link active" data-tab="tab-nav" type="button">▦ <span>导航内容</span></button>
+      <button class="sidebar-link" data-tab="tab-site" type="button">⚙ <span>站点设置</span></button>
+      <button class="sidebar-link" data-tab="tab-contact" type="button">✦ <span>联系方式</span></button>
       <div class="sidebar-tip"><strong>小提示</strong><span>修改内容后点击右上角“保存全部”，即可同步到线上首页。</span></div>
       <div class="sidebar-bottom"><a class="sidebar-link" href="/" target="_blank" rel="noopener">↗ <span>打开网站</span></a><button id="logout" class="logout-btn" type="button">退出登录</button></div>
     </aside>
 
     <main class="admin-main">
+      <!-- 顶部通知条 (极速反馈，最醒目位置) -->
+      <div id="status-container" class="status-container">
+        <p id="admin-status" class="status"></p>
+      </div>
+
       <header class="dashboard-header" id="overview">
-        <div><p class="eyebrow">CONTENT CENTER</p><h1>导航内容</h1><p class="page-subtitle">在这里管理网站分类、入口和移动端联系信息。</p></div>
+        <div>
+          <p class="eyebrow" id="current-view-eyebrow">CONTENT CENTER</p>
+          <h1 id="current-view-title">导航内容</h1>
+          <p class="page-subtitle" id="current-view-subtitle">在这里管理网站分类与入口网站。</p>
+        </div>
         <button id="save-all" class="primary-btn save-btn" type="button">✓ 保存全部</button>
       </header>
 
-      <div class="metrics-grid">
-        <div class="metric-card"><span>分类数量</span><strong id="metric-categories">0</strong><small>导航首页的内容分组</small></div>
-        <div class="metric-card"><span>网站入口</span><strong id="metric-items">0</strong><small>所有分类中的网站总数</small></div>
-        <div class="metric-card accent-card"><span>发布状态</span><strong>在线</strong><small>保存后立即更新首页</small></div>
+      <!-- TAB 1: 导航内容 (分类 + 网站入口) -->
+      <div id="tab-nav" class="tab-pane active">
+        <div class="metrics-grid">
+          <div class="metric-card"><span>分类数量</span><strong id="metric-categories">0</strong><small>导航首页的内容分组</small></div>
+          <div class="metric-card"><span>网站入口</span><strong id="metric-items">0</strong><small>所有分类中的网站总数</small></div>
+          <div class="metric-card accent-card"><span>发布状态</span><strong>在线</strong><small>保存后立即更新首页</small></div>
+        </div>
+
+        <div class="workspace-grid">
+          <section class="panel categories-panel">
+            <div class="panel-heading"><div><span class="panel-kicker">01 / CATEGORIES</span><h2>分类管理</h2></div><span class="panel-count" id="category-count">0</span></div>
+            <div class="category-tools"><input id="category-name" placeholder="输入分类名称"><div class="button-row"><button id="add-category" class="primary-btn" type="button">＋新增</button><button id="rename-category" class="ghost-btn" type="button">重命名</button><button id="delete-category" class="danger-btn" type="button">删除</button></div></div>
+            <div id="category-list" class="category-list"></div>
+          </section>
+
+          <section class="panel items-panel">
+            <div class="panel-heading"><div><span class="panel-kicker">02 / LINKS</span><h2>网站入口</h2><p id="selected-category" class="panel-note">请选择一个分类</p></div><span class="panel-count" id="item-count">0</span></div>
+            <div id="item-list" class="item-list"></div>
+            <div class="item-editor-wrap">
+              <div class="editor-title"><span>编辑网站</span><small>支持本地图标上传</small></div>
+              <form id="item-form" class="item-form">
+                <input id="item-id" type="hidden">
+                <div class="form-grid two"><label>网站名称<input id="item-name" required placeholder="例如：Cloudflare"></label><label>网站链接<input id="item-url" type="url" required placeholder="https://..."></label></div>
+                <label>简介<textarea id="item-desc" rows="2" placeholder="用一句话介绍这个网站"></textarea></label>
+                <div class="form-grid three"><label>标签<input id="item-tags" placeholder="AI, 工具"></label><label>徽章<input id="item-badge" placeholder="推荐"></label><label>主题色<input id="item-color" type="color" value="#6366f1"></label></div>
+                <div class="icon-picker"><label>自定义图标<input id="item-icon" type="file" accept="image/png,image/jpeg,image/webp"></label><div id="item-icon-preview" class="icon-preview">未设置自定义图标</div></div>
+                <div class="button-row"><button class="primary-btn" type="submit">保存网站</button><button id="clear-item" class="ghost-btn" type="button">清空表单</button></div>
+              </form>
+            </div>
+          </section>
+        </div>
       </div>
 
-      <section class="panel site-panel" id="site-settings" style="margin-bottom: 24px;">
-        <div class="panel-heading">
-          <div>
-            <span class="panel-kicker">00 / SITE INFO</span>
-            <h2>站点基本设置</h2>
-            <p class="panel-note">自定义导航站首页的名称与浏览器标签标题，保存后全站实时生效。</p>
+      <!-- TAB 2: 站点设置 (独立视图) -->
+      <div id="tab-site" class="tab-pane hidden">
+        <section class="panel site-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker">00 / SITE INFO</span>
+              <h2>站点基本设置</h2>
+              <p class="panel-note">自定义导航站首页的品牌名称与浏览器标签标题，修改后点击右上角“保存全部”全站实时生效。</p>
+            </div>
           </div>
-        </div>
-        <div class="form-grid three">
-          <label>网站名称 (首页左上角主标)
-            <input id="site-name" maxlength="60" placeholder="例如：爱搜资源 / 我的导航">
-          </label>
-          <label>副标题 / 描述
-            <input id="site-subtitle" maxlength="60" placeholder="例如：服务导航 / AI工作台">
-          </label>
-          <label>浏览器网页标题
-            <input id="site-browser-title" maxlength="100" placeholder="例如：服务导航 - 专属工作台">
-          </label>
-        </div>
-        <div class="contact-note">修改后点击右上角“保存全部”，首页品牌名及网页标题将立即无缝同步。</div>
-      </section>
-
-      <div class="workspace-grid">
-        <section class="panel categories-panel">
-          <div class="panel-heading"><div><span class="panel-kicker">01 / CATEGORIES</span><h2>分类管理</h2></div><span class="panel-count" id="category-count">0</span></div>
-          <div class="category-tools"><input id="category-name" placeholder="输入分类名称"><div class="button-row"><button id="add-category" class="primary-btn" type="button">＋新增</button><button id="rename-category" class="ghost-btn" type="button">重命名</button><button id="delete-category" class="danger-btn" type="button">删除</button></div></div>
-          <div id="category-list" class="category-list"></div>
-        </section>
-
-        <section class="panel items-panel">
-          <div class="panel-heading"><div><span class="panel-kicker">02 / LINKS</span><h2>网站入口</h2><p id="selected-category" class="panel-note">请选择一个分类</p></div><span class="panel-count" id="item-count">0</span></div>
-          <div id="item-list" class="item-list"></div>
-          <div class="item-editor-wrap">
-            <div class="editor-title"><span>编辑网站</span><small>支持本地图标上传</small></div>
-            <form id="item-form" class="item-form">
-              <input id="item-id" type="hidden">
-              <div class="form-grid two"><label>网站名称<input id="item-name" required placeholder="例如：Cloudflare"></label><label>网站链接<input id="item-url" type="url" required placeholder="https://..."></label></div>
-              <label>简介<textarea id="item-desc" rows="2" placeholder="用一句话介绍这个网站"></textarea></label>
-              <div class="form-grid three"><label>标签<input id="item-tags" placeholder="AI, 工具"></label><label>徽章<input id="item-badge" placeholder="推荐"></label><label>主题色<input id="item-color" type="color" value="#6366f1"></label></div>
-              <div class="icon-picker"><label>自定义图标<input id="item-icon" type="file" accept="image/png,image/jpeg,image/webp"></label><div id="item-icon-preview" class="icon-preview">未设置自定义图标</div></div>
-              <div class="button-row"><button class="primary-btn" type="submit">保存网站</button><button id="clear-item" class="ghost-btn" type="button">清空表单</button></div>
-            </form>
+          <div class="form-grid two" style="margin-bottom: 16px;">
+            <label>网站名称 (首页左上角主标)
+              <input id="site-name" maxlength="60" placeholder="例如：爱搜资源 / 我的导航">
+            </label>
+            <label>副标题 / 描述
+              <input id="site-subtitle" maxlength="60" placeholder="例如：服务导航 / AI工作台">
+            </label>
           </div>
+          <div class="form-grid" style="margin-bottom: 16px;">
+            <label>浏览器网页标题
+              <input id="site-browser-title" maxlength="100" placeholder="例如：服务导航 - 专属工作台">
+            </label>
+          </div>
+          <div class="contact-note">提示：填写完毕后请点击右上角「✓ 保存全部」按钮，首页品牌名及网页标题将立即无缝同步并持久化存入 Cloudflare D1。</div>
         </section>
       </div>
 
-      <section class="panel contact-panel" id="contact-settings">
-        <div class="panel-heading"><div><span class="panel-kicker">03 / CONTACT</span><h2>联系方式</h2><p class="panel-note">开启后，手机端底部“联系”标签会显示联系卡片。</p></div><label class="switch-label"><input id="contact-enabled" type="checkbox"><span class="switch"></span><span>显示联系入口</span></label></div>
-        <div class="form-grid two"><label>标题<input id="contact-title" maxlength="60" placeholder="联系站长"></label><label>说明文字<input id="contact-description" maxlength="240" placeholder="需要合作或资源交流，欢迎联系。"></label></div>
-        <div class="form-grid four contact-fields"><label>邮箱<input id="contact-email" type="email" placeholder="hello@example.com"></label><label>微信<input id="contact-wechat" placeholder="微信号"></label><label>QQ<input id="contact-qq" placeholder="QQ号"></label><label>Telegram<input id="contact-telegram" placeholder="用户名或 https://t.me/... "></label></div>
-        <div class="contact-note">填写后点击右上角“保存全部”。邮箱和 Telegram 链接会在网站上自动变成可点击入口。</div>
-      </section>
-
-      <p id="admin-status" class="status"></p>
+      <!-- TAB 3: 联系方式 (独立视图，不再堆在下方) -->
+      <div id="tab-contact" class="tab-pane hidden">
+        <section class="panel contact-panel" style="margin-top: 0;">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker">03 / CONTACT</span>
+              <h2>站长联系方式配置</h2>
+              <p class="panel-note">开启后，手机端底部“联系”标签与桌面端联系按钮会弹出站长联系卡片。</p>
+            </div>
+            <label class="switch-label">
+              <input id="contact-enabled" type="checkbox">
+              <span class="switch"></span>
+              <span>显示联系入口</span>
+            </label>
+          </div>
+          <div class="form-grid two">
+            <label>标题
+              <input id="contact-title" maxlength="60" placeholder="联系站长">
+            </label>
+            <label>说明文字
+              <input id="contact-description" maxlength="240" placeholder="需要合作或资源交流，欢迎联系。">
+            </label>
+          </div>
+          <div class="form-grid four contact-fields" style="margin-top: 14px;">
+            <label>邮箱
+              <input id="contact-email" type="email" placeholder="hello@example.com">
+            </label>
+            <label>微信
+              <input id="contact-wechat" placeholder="微信号">
+            </label>
+            <label>QQ
+              <input id="contact-qq" placeholder="QQ号">
+            </label>
+            <label>Telegram
+              <input id="contact-telegram" placeholder="用户名或 https://t.me/... ">
+            </label>
+          </div>
+          <div class="contact-note">填写后点击右上角“保存全部”。邮箱和 Telegram 链接会在网站上自动变成可点击入口。</div>
+        </section>
+      </div>
     </main>
   </section>
-  <script src="admin.js?v=3"></script>
+  <script src="admin.js?v=4"></script>
 </body>
 </html>

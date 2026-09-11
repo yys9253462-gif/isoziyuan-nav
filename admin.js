@@ -9,7 +9,29 @@ const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => 
 function defaultSiteConfig() { return { siteName: "爱搜资源", siteSubtitle: "服务导航", browserTitle: "服务导航 - 谷歌服务器专属工作台" }; }
 function defaultContact() { return { enabled: false, title: "联系站长", description: "需要合作或资源交流，欢迎联系。", email: "", wechat: "", qq: "", telegram: "" }; }
 function normalizeContact(value) { const raw = value && typeof value === "object" ? value : {}; return { enabled: Boolean(raw.enabled), title: String(raw.title || "联系站长").slice(0, 60), description: String(raw.description || "需要合作或资源交流，欢迎联系。").slice(0, 240), email: String(raw.email || "").slice(0, 160), wechat: String(raw.wechat || "").slice(0, 80), qq: String(raw.qq || "").slice(0, 40), telegram: String(raw.telegram || "").slice(0, 200) }; }
-function status(message, error = false) { const login = $("login-panel"); const node = login && !login.classList.contains("hidden") ? $("login-status") : $("admin-status"); node.textContent = message; node.className = `status ${error ? "error" : "ok"}`; }
+let statusTimer = null;
+function status(message, error = false) {
+  const login = $("login-panel");
+  const isLoginPage = login && !login.classList.contains("hidden");
+  const node = isLoginPage ? $("login-status") : $("admin-status");
+  if (!node) return;
+  node.textContent = message;
+  node.className = `status ${error ? "error" : "ok"}`;
+  
+  if (!isLoginPage && message) {
+    const container = $("status-container");
+    if (container) {
+      container.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    clearTimeout(statusTimer);
+    if (!error) {
+      statusTimer = setTimeout(() => {
+        node.className = "status";
+        node.textContent = "";
+      }, 7000);
+    }
+  }
+}
 function selectedCategory() { return navData.find((category) => category.id === selectedCategoryId); }
 function renderCategories() {
   $("category-list").innerHTML = navData.length ? navData.map((category) => `<button type="button" class="category ${category.id === selectedCategoryId ? "active" : ""}" data-id="${escapeHtml(category.id)}"><span>${escapeHtml(category.name)}</span><small>${category.items.length}</small></button>`).join("") : '<div class="empty">还没有分类</div>';
@@ -89,4 +111,45 @@ $("save-all").addEventListener("click", async () => {
     $("save-all").disabled = false;
   }
 });
+
+// Tab 切换控制器
+const TAB_META = {
+  "tab-nav": {
+    eyebrow: "CONTENT CENTER",
+    title: "导航内容",
+    subtitle: "在这里管理网站分类与入口网站。"
+  },
+  "tab-site": {
+    eyebrow: "SITE CONFIGURATION",
+    title: "站点设置",
+    subtitle: "自定义导航首页品牌名、副标与浏览器标签标题。"
+  },
+  "tab-contact": {
+    eyebrow: "CONTACT CHANNELS",
+    title: "联系方式",
+    subtitle: "独立管理站长联系方式，开启后在全网前端展示。"
+  }
+};
+
+document.querySelectorAll(".sidebar-link[data-tab]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const targetTab = btn.dataset.tab;
+    // 切换按钮激活态
+    document.querySelectorAll(".sidebar-link[data-tab]").forEach((b) => b.classList.toggle("active", b === btn));
+    // 切换内容面板
+    document.querySelectorAll(".tab-pane").forEach((pane) => {
+      const isTarget = pane.id === targetTab;
+      pane.classList.toggle("active", isTarget);
+      pane.classList.toggle("hidden", !isTarget);
+    });
+    // 切换顶部标题
+    const meta = TAB_META[targetTab];
+    if (meta) {
+      if ($("current-view-eyebrow")) $("current-view-eyebrow").textContent = meta.eyebrow;
+      if ($("current-view-title")) $("current-view-title").textContent = meta.title;
+      if ($("current-view-subtitle")) $("current-view-subtitle").textContent = meta.subtitle;
+    }
+  });
+});
+
 
