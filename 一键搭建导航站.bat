@@ -100,16 +100,33 @@ if errorlevel 1 goto fail_github
 echo   [OK] GitHub 授权成功
 :step_fork
 echo.
-echo [2/8] 正在 Fork 仓库到你的 GitHub 账号并克隆到本地 ...
+echo [2/8] 正在获取仓库代码到本地 ...
 if exist "isoziyuan-nav" (
     echo   [提示] 检测到 isoziyuan-nav 目录已存在, 直接复用。
     cd isoziyuan-nav
     echo   [OK] 已进入 %cd%
     goto step_cf_login
 )
-if "%DRYRUN%"=="1" echo   [试运行] gh repo fork yys9253462-gif/isoziyuan-nav --clone
-if "%DRYRUN%"=="0" gh repo fork yys9253462-gif/isoziyuan-nav --clone
-if errorlevel 1 goto fail_github
+if "%DRYRUN%"=="1" goto fork_done
+rem 识别当前授权账号: 仓库作者本人运行时 GitHub 不允许 Fork 自己的仓库
+set "GH_USER="
+for /f "usebackq delims=" %%u in (`gh api user -q .login 2^>nul`) do set "GH_USER=%%u"
+if "%GH_USER%"=="yys9253462-gif" goto fork_owner
+echo   正在 Fork 仓库到你的 GitHub 账号 ^(%GH_USER%^) ...
+gh repo fork yys9253462-gif/isoziyuan-nav --clone
+if not errorlevel 1 goto fork_done
+echo   [提示] Fork 未成功, 改为直接克隆仓库 ...
+if not "%GH_USER%"=="" git clone --depth 1 https://github.com/%GH_USER%/isoziyuan-nav.git 2>nul
+if exist "isoziyuan-nav" goto fork_done
+git clone --depth 1 https://github.com/yys9253462-gif/isoziyuan-nav.git
+goto fork_done
+
+:fork_owner
+echo   [提示] 当前账号就是仓库作者, 无需 Fork, 直接克隆
+git clone --depth 1 https://github.com/yys9253462-gif/isoziyuan-nav.git
+
+:fork_done
+if "%DRYRUN%"=="1" goto step_cf_login
 if not exist "isoziyuan-nav" goto fail_github
 cd isoziyuan-nav
 echo   [OK] 代码已克隆到 %cd%
@@ -117,7 +134,11 @@ goto step_cf_login
 
 :fail_github
 echo.
-echo [X] GitHub 授权或克隆失败。请检查网络后重新运行本脚本。
+echo [X] 获取仓库代码失败, 常见原因:
+echo     1. 网络无法访问 github.com ^(请检查代理/VPN 后重新运行^)
+echo     2. GitHub 授权已过期 ^(运行: gh auth login 重新授权^)
+echo     3. 目标文件夹里已有同名文件冲突
+echo 修复后重新双击运行本脚本即可, 已完成的授权会自动跳过。
 pause
 exit /b 1
 
