@@ -159,7 +159,7 @@ if "%DRYRUN%"=="1" (
 )
 call npx wrangler login
 if errorlevel 1 goto fail_cf
-npx wrangler whoami
+call npx wrangler whoami
 goto step_d1
 
 :fail_cf
@@ -176,7 +176,7 @@ if "%DRYRUN%"=="1" (
     echo   [试运行] npx wrangler d1 create isoziyuan-nav-db
     goto step_schema
 )
-npx wrangler d1 create isoziyuan-nav-db > d1_create_result.txt 2>&1
+call npx wrangler d1 create isoziyuan-nav-db > d1_create_result.txt 2>&1
 if errorlevel 1 goto fail_d1
 findstr /c:"database_id" d1_create_result.txt
 del d1_create_result.txt
@@ -197,8 +197,8 @@ if "%DRYRUN%"=="1" (
     echo   [试运行] 修正 wrangler.jsonc 的 database_id + 执行 schema.sql
     goto step_project
 )
-rem 读取新数据库 ID 并写入 wrangler.jsonc
-for /f "tokens=2 delims=: " %%a in ('npx wrangler d1 info isoziyuan-nav-db --json 2^>nul ^| findstr /i "uuid"') do set NEW_DB_ID=%%a
+rem 读取新数据库 ID (兼容 uuid / database_id 字段) 并写入 wrangler.jsonc
+for /f "tokens=2 delims=: " %%a in ('npx wrangler d1 info isoziyuan-nav-db --json 2^>nul ^| findstr /i "uuid database_id"') do set NEW_DB_ID=%%a
 set NEW_DB_ID=%NEW_DB_ID:"=%
 set NEW_DB_ID=%NEW_DB_ID:,=%
 if "%NEW_DB_ID%"=="" goto fail_dbid
@@ -206,7 +206,7 @@ echo   新数据库 ID: %NEW_DB_ID%
 powershell -NoProfile -Command "$f='wrangler.jsonc'; $t=[IO.File]::ReadAllText($f); $t=[regex]::Replace($t,'\"database_id\":\s*\"[0-9a-fA-F-]+\"','\"database_id\": \"%NEW_DB_ID%\"'); [IO.File]::WriteAllText($f,$t)"
 echo   [OK] wrangler.jsonc 已指向你的专属数据库
 
-npx wrangler d1 execute isoziyuan-nav-db --remote --file schema.sql
+call npx wrangler d1 execute isoziyuan-nav-db --remote --file schema.sql -y
 if errorlevel 1 goto fail_schema
 echo   [OK] 数据表初始化完成
 goto step_project
@@ -226,10 +226,10 @@ rem ---------- [6/8] 创建 Pages 项目 ----------
 echo.
 echo [6/8] 创建 Cloudflare Pages 项目: isoziyuan-nav ...
 if "%DRYRUN%"=="1" (
-    echo   [试运行] npx wrangler pages project create isoziyuan-nav --production-branch main
+    echo   [试运行] call npx wrangler pages project create isoziyuan-nav --production-branch main
     goto step_password
 )
-npx wrangler pages project create isoziyuan-nav --production-branch main 2>nul
+call npx wrangler pages project create isoziyuan-nav --production-branch main 2>nul
 if errorlevel 1 (
     echo   [提示] 项目可能已存在, 继续使用现有项目。
 )
@@ -248,11 +248,11 @@ if "%ADMIN_PASS%"=="" (
 echo 你的后台管理密码: %ADMIN_PASS%
 echo ^(请立即抄写保存, 后面还会再显示一次^)
 if "%DRYRUN%"=="1" (
-    echo   [试运行] npx wrangler pages secret put ADMIN_PASSWORD --project-name isoziyuan-nav
+    echo   [试运行] call npx wrangler pages secret put ADMIN_PASSWORD --project-name isoziyuan-nav
     goto step_deploy
 )
 powershell -NoProfile -Command "[IO.File]::WriteAllText('adminpass.tmp','%ADMIN_PASS%')"
-npx wrangler pages secret put ADMIN_PASSWORD --project-name isoziyuan-nav < adminpass.tmp
+call npx wrangler pages secret put ADMIN_PASSWORD --project-name isoziyuan-nav < adminpass.tmp
 del adminpass.tmp
 if errorlevel 1 goto fail_secret
 echo   [OK] 管理密码已加密写入
