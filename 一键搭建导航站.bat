@@ -77,7 +77,16 @@ exit /b 1
 rem ---------- [2/8] GitHub 授权 ----------
 :step_github
 echo.
-echo [2/8] GitHub 授权 ^(会打开浏览器, 登录并输入屏幕上的配对码^) ...
+echo [2/8] GitHub 授权 — 请按下面 3 步操作:
+echo.
+echo   第 1 步: 屏幕马上会显示一个一次性代码, 形如 XXXX-XXXX
+echo           ^(英文提示 First copy your one-time code^), 请先选中它按回车复制
+echo   第 2 步: 看到英文提示 Press Enter to open ... 时, 按一下回车键,
+echo           会自动打开浏览器进入 GitHub 登录页 ^(不是卡死, 就是在等你按键^)
+echo   第 3 步: 在浏览器登录 GitHub 账号, 输入刚才复制的代码,
+echo           点击 Authorize 授权, 然后回到本窗口继续
+echo.
+echo ----------------------------------------------
 if "%DRYRUN%"=="1" echo   [试运行] gh auth login --web --git-protocol https
 if "%DRYRUN%"=="0" gh auth login --hostname github.com --git-protocol https --web
 if errorlevel 1 goto fail_github
