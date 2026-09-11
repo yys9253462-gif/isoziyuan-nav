@@ -77,6 +77,13 @@ exit /b 1
 rem ---------- [2/8] GitHub 授权 ----------
 :step_github
 echo.
+if "%DRYRUN%"=="1" goto step_github_do
+gh auth status >nul 2>nul
+if not errorlevel 1 (
+    echo   [OK] 检测到本机已有 GitHub 授权, 跳过登录步骤
+    goto step_fork
+)
+:step_github_do
 echo [2/8] GitHub 授权 — 请按下面 3 步操作:
 echo.
 echo   第 1 步: 屏幕马上会显示一个一次性代码, 形如 XXXX-XXXX
@@ -91,6 +98,7 @@ if "%DRYRUN%"=="1" echo   [试运行] gh auth login --web --git-protocol https
 if "%DRYRUN%"=="0" gh auth login --hostname github.com --git-protocol https --web
 if errorlevel 1 goto fail_github
 echo   [OK] GitHub 授权成功
+:step_fork
 echo.
 echo [2/8] 正在 Fork 仓库到你的 GitHub 账号并克隆到本地 ...
 if exist "isoziyuan-nav" (
@@ -116,6 +124,13 @@ exit /b 1
 rem ---------- [3/8] Cloudflare 授权 ----------
 :step_cf_login
 echo.
+if "%DRYRUN%"=="1" goto step_cf_do
+call npx wrangler whoami >nul 2>nul
+if not errorlevel 1 (
+    echo   [OK] 检测到本机已有 Cloudflare 授权, 跳过登录步骤
+    goto step_d1
+)
+:step_cf_do
 echo [3/8] Cloudflare 授权 ^(会打开浏览器, 登录你的 Cloudflare 账号并点击 Allow^) ...
 if "%DRYRUN%"=="1" (
     echo   [试运行] npx wrangler login
