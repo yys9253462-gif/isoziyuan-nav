@@ -16,9 +16,30 @@ echo   全程只需在浏览器里点 2 次授权, 其余全自动
 echo ==================================================
 echo.
 
-rem ---------- [0/8] 试运行模式检测 ----------
+rem ---------- [0/8] 试运行模式检测与授权模式选择 ----------
 set DRYRUN=0
 if /i "%~1"=="dry" set DRYRUN=1
+
+echo 请选择运行模式:
+echo   [1] 识别本地已授权模式 (推荐, 自动检测并跳过已授权的账号)
+echo   [2] 全新授权模式 (强制重新登录 GitHub 和 Cloudflare, 适合换号或重置)
+echo.
+set AUTH_FORCE=0
+if "%DRYRUN%"=="1" (
+    echo   [试运行] 默认使用识别模式 [1]
+    goto step_env
+)
+choice /c 12 /t 10 /d 1 /m "请按 1 或 2 (10 秒无操作默认选 1): "
+if errorlevel 2 (
+    set AUTH_FORCE=1
+    echo   已选择: [2] 全新授权模式
+) else (
+    set AUTH_FORCE=0
+    echo   已选择: [1] 识别本地已授权模式
+)
+echo.
+
+:step_env
 
 rem ---------- [1/8] 环境检测: git / node / gh ----------
 echo [1/8] 检测运行环境 (Git / Node.js / GitHub CLI) ...
@@ -78,10 +99,12 @@ rem ---------- [2/8] GitHub 授权 ----------
 :step_github
 echo.
 if "%DRYRUN%"=="1" goto step_github_do
-gh auth status >nul 2>nul
-if not errorlevel 1 (
-    echo   [OK] 检测到本机已有 GitHub 授权, 跳过登录步骤
-    goto step_fork
+if "%AUTH_FORCE%"=="0" (
+    gh auth status >nul 2>nul
+    if not errorlevel 1 (
+        echo   [OK] 检测到本机已有 GitHub 授权, 跳过登录步骤
+        goto step_fork
+    )
 )
 :step_github_do
 echo [2/8] GitHub 授权 — 请按下面 3 步操作:
@@ -146,10 +169,12 @@ rem ---------- [3/8] Cloudflare 授权 ----------
 :step_cf_login
 echo.
 if "%DRYRUN%"=="1" goto step_cf_do
-call npx wrangler whoami >nul 2>nul
-if not errorlevel 1 (
-    echo   [OK] 检测到本机已有 Cloudflare 授权, 跳过登录步骤
-    goto step_d1
+if "%AUTH_FORCE%"=="0" (
+    call npx wrangler whoami >nul 2>nul
+    if not errorlevel 1 (
+        echo   [OK] 检测到本机已有 Cloudflare 授权, 跳过登录步骤
+        goto step_d1
+    )
 )
 :step_cf_do
 echo [3/8] Cloudflare 授权 ^(会打开浏览器, 登录你的 Cloudflare 账号并点击 Allow^) ...
