@@ -139,6 +139,40 @@ export function normalizeNavData(input) {
   });
 }
 
+const DEFAULT_SITE_CONFIG = {
+  siteName: "爱搜资源",
+  siteSubtitle: "服务导航",
+  browserTitle: "服务导航 - 谷歌服务器专属工作台",
+};
+
+export function normalizeSiteConfig(input) {
+  const raw = input && typeof input === "object" ? input : {};
+  const clean = (value, max) => String(value ?? "").trim().slice(0, max);
+  return {
+    siteName: clean(raw.siteName || DEFAULT_SITE_CONFIG.siteName, 60) || DEFAULT_SITE_CONFIG.siteName,
+    siteSubtitle: clean(raw.siteSubtitle || DEFAULT_SITE_CONFIG.siteSubtitle, 60),
+    browserTitle: clean(raw.browserTitle || DEFAULT_SITE_CONFIG.browserTitle, 100),
+  };
+}
+
+export async function loadSiteConfig(db) {
+  const row = await db.prepare("SELECT value FROM site_settings WHERE key = 'site_config'").first();
+  if (!row?.value) return normalizeSiteConfig(DEFAULT_SITE_CONFIG);
+  try {
+    return normalizeSiteConfig(JSON.parse(row.value));
+  } catch {
+    return normalizeSiteConfig(DEFAULT_SITE_CONFIG);
+  }
+}
+
+export async function saveSiteConfig(db, input) {
+  const site = normalizeSiteConfig(input);
+  await db.prepare("INSERT INTO site_settings (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at")
+    .bind("site_config", JSON.stringify(site), Math.floor(Date.now() / 1000))
+    .run();
+  return site;
+}
+
 export function normalizeContact(input) {
   const raw = input && typeof input === "object" ? input : {};
   const clean = (value, max) => String(value ?? "").trim().slice(0, max);

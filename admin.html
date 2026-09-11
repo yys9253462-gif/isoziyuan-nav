@@ -29,6 +29,7 @@
       <div class="admin-brand"><div class="brand-mark small">☁</div><div><strong>爱搜云导航</strong><span>管理控制台</span></div></div>
       <div class="sidebar-section-title">工作区</div>
       <a class="sidebar-link active" href="#overview">▦ <span>导航内容</span></a>
+      <a class="sidebar-link" href="#site-settings">⚙ <span>站点设置</span></a>
       <a class="sidebar-link" href="#contact-settings">✦ <span>联系方式</span></a>
       <div class="sidebar-tip"><strong>小提示</strong><span>修改内容后点击右上角“保存全部”，即可同步到线上首页。</span></div>
       <div class="sidebar-bottom"><a class="sidebar-link" href="/" target="_blank" rel="noopener">↗ <span>打开网站</span></a><button id="logout" class="logout-btn" type="button">退出登录</button></div>
@@ -45,6 +46,28 @@
         <div class="metric-card"><span>网站入口</span><strong id="metric-items">0</strong><small>所有分类中的网站总数</small></div>
         <div class="metric-card accent-card"><span>发布状态</span><strong>在线</strong><small>保存后立即更新首页</small></div>
       </div>
+
+      <section class="panel site-panel" id="site-settings" style="margin-bottom: 24px;">
+        <div class="panel-heading">
+          <div>
+            <span class="panel-kicker">00 / SITE INFO</span>
+            <h2>站点基本设置</h2>
+            <p class="panel-note">自定义导航站首页的名称与浏览器标签标题，保存后全站实时生效。</p>
+          </div>
+        </div>
+        <div class="form-grid three">
+          <label>网站名称 (首页左上角主标)
+            <input id="site-name" maxlength="60" placeholder="例如：爱搜资源 / 我的导航">
+          </label>
+          <label>副标题 / 描述
+            <input id="site-subtitle" maxlength="60" placeholder="例如：服务导航 / AI工作台">
+          </label>
+          <label>浏览器网页标题
+            <input id="site-browser-title" maxlength="100" placeholder="例如：服务导航 - 专属工作台">
+          </label>
+        </div>
+        <div class="contact-note">修改后点击右上角“保存全部”，首页品牌名及网页标题将立即无缝同步。</div>
+      </section>
 
       <div class="workspace-grid">
         <section class="panel categories-panel">
@@ -80,6 +103,6 @@
       <p id="admin-status" class="status"></p>
     </main>
   </section>
-  <script src="admin.js?v=2"></script>
+  <script src="admin.js?v=3"></script>
 </body>
 </html>

@@ -217,6 +217,23 @@ function initMobileBottomNav() {
 // 启动与实时刷新机制
 let isInitialized = false;
 
+function applySiteConfig(site) {
+  if (!site || typeof site !== 'object') return;
+  const brandEl = document.getElementById('brand-title');
+  if (brandEl) {
+    if (site.siteName && site.siteSubtitle) {
+      brandEl.textContent = `${site.siteName} · ${site.siteSubtitle}`;
+    } else if (site.siteName) {
+      brandEl.textContent = site.siteName;
+    }
+  }
+  if (site.browserTitle) {
+    document.title = site.browserTitle;
+  } else if (site.siteName) {
+    document.title = `${site.siteName} - 精选导航`;
+  }
+}
+
 async function fetchNavConfig() {
   const query = `?_t=${Date.now()}`;
   try {
@@ -226,16 +243,17 @@ async function fetchNavConfig() {
     if (!result.success || !Array.isArray(result.data) || result.data.length === 0) {
       throw new Error('No database data');
     }
-    return { data: result.data, contact: result.contact };
+    return { data: result.data, contact: result.contact, site: result.site };
   } catch (err) {
     const data = await fetch('data.json' + query, { cache: 'no-store' }).then(r => r.json());
-    return { data, contact: defaultContact() };
+    return { data, contact: defaultContact(), site: null };
   }
 }
 
 async function applyNavPayload(payload) {
   navData = payload.data;
   contact = normalizeContact(payload.contact);
+  if (payload.site) applySiteConfig(payload.site);
   renderSidebar();
   const searchInput = document.getElementById('search-input');
   renderContent(searchInput ? searchInput.value : '');

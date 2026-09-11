@@ -1,10 +1,12 @@
 let navData = [];
 let contact = defaultContact();
+let siteConfig = defaultSiteConfig();
 let selectedCategoryId = "";
 let itemIconData = "";
 
 const $ = (id) => document.getElementById(id);
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[char]));
+function defaultSiteConfig() { return { siteName: "爱搜资源", siteSubtitle: "服务导航", browserTitle: "服务导航 - 谷歌服务器专属工作台" }; }
 function defaultContact() { return { enabled: false, title: "联系站长", description: "需要合作或资源交流，欢迎联系。", email: "", wechat: "", qq: "", telegram: "" }; }
 function normalizeContact(value) { const raw = value && typeof value === "object" ? value : {}; return { enabled: Boolean(raw.enabled), title: String(raw.title || "联系站长").slice(0, 60), description: String(raw.description || "需要合作或资源交流，欢迎联系。").slice(0, 240), email: String(raw.email || "").slice(0, 160), wechat: String(raw.wechat || "").slice(0, 80), qq: String(raw.qq || "").slice(0, 40), telegram: String(raw.telegram || "").slice(0, 200) }; }
 function status(message, error = false) { const login = $("login-panel"); const node = login && !login.classList.contains("hidden") ? $("login-status") : $("admin-status"); node.textContent = message; node.className = `status ${error ? "error" : "ok"}`; }
@@ -26,11 +28,29 @@ function renderItems() {
 function setIconPreview(icon) { $("item-icon-preview").innerHTML = icon ? `<img src="${escapeHtml(icon)}" alt="自定义图标"><span>已选择自定义图标</span>` : "未设置自定义图标"; }
 function fillItem(item) { $("item-id").value = item.id || ""; $("item-name").value = item.name || ""; $("item-url").value = item.url || ""; $("item-desc").value = item.desc || ""; $("item-tags").value = (item.tags || []).join(", "); $("item-badge").value = item.badge || ""; $("item-color").value = item.color || "#6366f1"; itemIconData = item.icon || ""; $("item-icon").value = ""; setIconPreview(itemIconData); document.querySelector(".item-editor-wrap").scrollIntoView({ behavior: "smooth", block: "center" }); }
 function clearItem() { ["item-id", "item-name", "item-url", "item-desc", "item-tags", "item-badge"].forEach((id) => $(id).value = ""); $("item-color").value = "#6366f1"; $("item-icon").value = ""; itemIconData = ""; setIconPreview(""); }
+function fillSiteConfig(value) {
+  const raw = value && typeof value === "object" ? value : {};
+  siteConfig = {
+    siteName: String(raw.siteName || defaultSiteConfig().siteName).slice(0, 60),
+    siteSubtitle: String(raw.siteSubtitle || defaultSiteConfig().siteSubtitle).slice(0, 60),
+    browserTitle: String(raw.browserTitle || defaultSiteConfig().browserTitle).slice(0, 100),
+  };
+  if ($("site-name")) $("site-name").value = siteConfig.siteName;
+  if ($("site-subtitle")) $("site-subtitle").value = siteConfig.siteSubtitle;
+  if ($("site-browser-title")) $("site-browser-title").value = siteConfig.browserTitle;
+}
+function readSiteConfig() {
+  return {
+    siteName: ($("site-name") ? $("site-name").value.trim() : "") || defaultSiteConfig().siteName,
+    siteSubtitle: $("site-subtitle") ? $("site-subtitle").value.trim() : "",
+    browserTitle: $("site-browser-title") ? $("site-browser-title").value.trim() : "",
+  };
+}
 function fillContact(value) { contact = normalizeContact(value); $("contact-enabled").checked = contact.enabled; $("contact-title").value = contact.title; $("contact-description").value = contact.description; $("contact-email").value = contact.email; $("contact-wechat").value = contact.wechat; $("contact-qq").value = contact.qq; $("contact-telegram").value = contact.telegram; }
 function readContact() { return normalizeContact({ enabled: $("contact-enabled").checked, title: $("contact-title").value, description: $("contact-description").value, email: $("contact-email").value, wechat: $("contact-wechat").value, qq: $("contact-qq").value, telegram: $("contact-telegram").value }); }
 function render() { renderCategories(); renderItems(); }
 async function api(url, options = {}) { const response = await fetch(url, { headers: { "content-type": "application/json", ...(options.headers || {}) }, ...options }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "请求失败"); return data; }
-async function load() { try { const result = await api("/api/admin/nav"); navData = result.data || []; fillContact(result.contact); if (!navData.length) { navData = await fetch("/data.json").then((response) => response.json()); status("数据库为空，已载入现有 data.json，请点击“保存全部”完成导入。"); } selectedCategoryId = navData[0]?.id || ""; $("category-name").value = selectedCategory()?.name || ""; render(); } catch (error) { if (error.message.includes("登录")) { $("admin-panel").classList.add("hidden"); $("login-panel").classList.remove("hidden"); } status(error.message, true); } }
+async function load() { try { const result = await api("/api/admin/nav"); navData = result.data || []; fillContact(result.contact); fillSiteConfig(result.site); if (!navData.length) { navData = await fetch("/data.json").then((response) => response.json()); status("数据库为空，已载入现有 data.json，请点击“保存全部”完成导入。"); } selectedCategoryId = navData[0]?.id || ""; $("category-name").value = selectedCategory()?.name || ""; render(); } catch (error) { if (error.message.includes("登录")) { $("admin-panel").classList.add("hidden"); $("login-panel").classList.remove("hidden"); } status(error.message, true); } }
 
 $("login-form").addEventListener("submit", async (event) => { event.preventDefault(); try { await api("/api/admin/login", { method: "POST", body: JSON.stringify({ username: $("username").value, password: $("password").value }) }); $("login-panel").classList.add("hidden"); $("admin-panel").classList.remove("hidden"); await load(); } catch (error) { $("login-status").textContent = error.message; $("login-status").className = "status error"; } });
 $("logout").addEventListener("click", async () => { await api("/api/admin/logout", { method: "POST" }); location.reload(); });
@@ -45,10 +65,11 @@ $("save-all").addEventListener("click", async () => {
     $("save-all").disabled = true;
     const result = await api("/api/admin/nav", {
       method: "PUT",
-      body: JSON.stringify({ data: navData, contact: readContact() }),
+      body: JSON.stringify({ data: navData, contact: readContact(), site: readSiteConfig() }),
     });
     navData = result.data || navData;
     fillContact(result.contact);
+    fillSiteConfig(result.site);
     render();
 
     // 广播跨标签实时同步事件给前台
