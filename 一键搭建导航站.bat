@@ -123,9 +123,16 @@ if errorlevel 1 goto fail_github
 echo   [OK] GitHub 授权成功
 :step_fork
 echo.
-echo [2/8] 正在获取仓库代码到本地 ...
-if exist "isoziyuan-nav" (
-    echo   [提示] 检测到 isoziyuan-nav 目录已存在, 直接复用。
+echo [2/8] 正在准备项目代码 ...
+rem 场景 A: 用户直接在解压/克隆的仓库根目录下运行本脚本
+if exist "wrangler.jsonc" if exist "schema.sql" (
+    echo   [OK] 检测到当前目录已是导航站源码目录, 无需重复克隆
+    goto step_cf_login
+)
+
+rem 场景 B: 用户在外部目录运行, 且已有 isoziyuan-nav 子文件夹
+if exist "isoziyuan-nav\wrangler.jsonc" (
+    echo   [提示] 检测到已有完整代码目录, 直接复用
     cd isoziyuan-nav
     echo   [OK] 已进入 %cd%
     goto step_cf_login
@@ -222,13 +229,17 @@ if "%DRYRUN%"=="1" (
     echo   [试运行] 修正 wrangler.jsonc 的 database_id + 执行 schema.sql
     goto step_project
 )
-rem 读取新数据库 ID (兼容 uuid / database_id 字段) 并写入 wrangler.jsonc
-for /f "tokens=2 delims=: " %%a in ('npx wrangler d1 info isoziyuan-nav-db --json 2^>nul ^| findstr /i "uuid database_id"') do set NEW_DB_ID=%%a
-set NEW_DB_ID=%NEW_DB_ID:"=%
-set NEW_DB_ID=%NEW_DB_ID:,=%
+rem 稳健获取新数据库 ID 并写入 wrangler.jsonc (PowerShell 解析 JSON, 避免 token 切分错误)
+set "NEW_DB_ID="
+for /f "delims=" %%a in ('powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; $j = (npx wrangler d1 info isoziyuan-nav-db --json 2^>$null | ConvertFrom-Json); if($j.uuid){$j.uuid} elseif($j.database_id){$j.database_id}"') do set "NEW_DB_ID=%%a"
+if "%NEW_DB_ID%"=="" (
+    for /f "tokens=2 delims=: " %%a in ('call npx wrangler d1 info isoziyuan-nav-db --json 2^>nul ^| findstr /i "uuid database_id"') do set NEW_DB_ID=%%a
+    set NEW_DB_ID=%NEW_DB_ID:"=%
+    set NEW_DB_ID=%NEW_DB_ID:,=%
+)
 if "%NEW_DB_ID%"=="" goto fail_dbid
 echo   新数据库 ID: %NEW_DB_ID%
-powershell -NoProfile -Command "$f='wrangler.jsonc'; $t=[IO.File]::ReadAllText($f); $t=[regex]::Replace($t,'\"database_id\":\s*\"[0-9a-fA-F-]+\"','\"database_id\": \"%NEW_DB_ID%\"'); [IO.File]::WriteAllText($f,$t)"
+powershell -NoProfile -Command "$f='wrangler.jsonc'; $enc=[System.Text.Encoding]::UTF8; $t=[IO.File]::ReadAllText($f, $enc); $t=[regex]::Replace($t,'\"database_id\":\s*\"[0-9a-fA-F-]+\"','\"database_id\": \"%NEW_DB_ID%\"'); [IO.File]::WriteAllText($f, $t, $enc)"
 echo   [OK] wrangler.jsonc 已指向你的专属数据库
 
 call npx wrangler d1 execute isoziyuan-nav-db --remote --file schema.sql -y
@@ -266,7 +277,7 @@ rem ---------- [7/8] 设置后台管理密码 ----------
 echo.
 echo [7/8] 设置后台管理密码 ^(用于登录 /admin 管理面板^) ...
 set "ADMIN_PASS="
-set /p ADMIN_PASS=请输入你想设置的管理密码 ^(直接回车则自动生成随机密码^): 
+set /p ADMIN_PASS=请输入你想设置的管理密码 ^(字母和数字, 直接回车自动生成随机密码^): 
 if "%ADMIN_PASS%"=="" (
     for /f %%a in ('powershell -NoProfile -Command "-join((48..57)+(65..90)+(97..122) | Get-Random -Count 10 | %%{[char]$_})"') do set "ADMIN_PASS=Nav%%a2026"
 )
@@ -321,6 +332,9 @@ echo.
 echo   绑定独立域名: Cloudflare 控制台 - Pages 项目
 echo   - 自定义域 - 输入你的域名即可自动解析
 echo ==================================================
+echo.
+rem 自动保存一份凭据到桌面, 防止手滑关闭窗口导致密码丢失
+powershell -NoProfile -Command "$dt=[Environment]::GetFolderPath('Desktop'); $p=Join-Path $dt '导航站后台信息.txt'; $content="==============================`r`n导航站搭建信息 (请妥善保管)`r`n==============================`r`n导航站网址: https://isoziyuan-nav.pages.dev`r`n管理后台:   https://isoziyuan-nav.pages.dev/admin`r`n后台密码:   %ADMIN_PASS%`r`n搭建时间:   " + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss'); [IO.File]::WriteAllText($p, $content, [System.Text.Encoding]::UTF8); Write-Host '  [提示] 账号密码已自动备份到你的桌面: 导航站后台信息.txt'"
 echo.
 echo 感谢使用爱搜资源教程 ^(https://isoziyuan.com^)
 pause
