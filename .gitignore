@@ -2,3 +2,7 @@
 .dev.vars
 .env
 node_modules/
+
+isoziyuan-nav/
+*.tmp
+
