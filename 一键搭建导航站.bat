@@ -1,80 +1,151 @@
 @echo off
 rem =======================================================
-rem °®ËÑ×ÊÔ´ - µ¼º½Õ¾Ò»¼üÈ«×Ô¶¯´î½¨½Å±¾ (Cloudflare Pages + D1)
-rem ÏîÄ¿: https://github.com/yys9253462-gif/isoziyuan-nav
-rem ½Ì³Ì: https://isoziyuan.com/p/100139/
-rem Á÷³Ì: »·¾³¼ì²â -> GitHubÊÚÈ¨+Fork -> CloudflareÊÚÈ¨
-rem       -> D1½¨¿â½¨±í -> Pages²¿Êğ -> ÉèÖÃºóÌ¨ÃÜÂë
+rem çˆ±æœèµ„æº - å¯¼èˆªç«™ä¸€é”®å…¨è‡ªåŠ¨æ­å»ºè„šæœ¬ (Cloudflare Pages + D1)
+rem é¡¹ç›®: https://github.com/yys9253462-gif/isoziyuan-nav
+rem æ•™ç¨‹: https://isoziyuan.com/p/100139/
+rem æµç¨‹: ç¯å¢ƒæ£€æµ‹ -> GitHubæˆæƒ+Fork -> Cloudflareæˆæƒ
+rem       -> D1å»ºåº“å»ºè¡¨ -> Pageséƒ¨ç½² -> è®¾ç½®åå°å¯†ç 
 rem =======================================================
 setlocal
-title µ¼º½Õ¾Ò»¼üÈ«×Ô¶¯´î½¨¹¤¾ß - °®ËÑ×ÊÔ´
+title å¯¼èˆªç«™ä¸€é”®å…¨è‡ªåŠ¨æ­å»ºå·¥å…·
 cd /d "%~dp0"
 
+rem ---------- è‡ªåŠ¨æ£€æµ‹å¹¶ç»§æ‰¿ç³»ç»Ÿä¸ V2Ray ä»£ç†é…ç½® (è§£å†³ GitHub/CF TLS è¶…æ—¶ä¸é˜»æ–­) ----------
+set "SYS_PROXY="
+set "PROXY_ENABLED=0"
+for /f "tokens=3" %%i in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /v ProxyEnable 2^>nul ^| findstr "0x1"') do (
+    set "PROXY_ENABLED=1"
+)
+if "%PROXY_ENABLED%"=="1" (
+    for /f "tokens=3" %%i in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /v ProxyServer 2^>nul') do (
+        set "SYS_PROXY=%%i"
+    )
+)
+
+rem å¦‚æœç³»ç»Ÿä»£ç†æœªç›´æ¥å¼€å¯ï¼Œè‡ªåŠ¨ä¾¦æµ‹æœ¬åœ°è¿è¡Œä¸­çš„ V2Ray æ ¸å¿ƒç«¯å£ (10808 / 10809 / 7890)
+if not "%SYS_PROXY%"=="" goto check_proxy_format
+netstat -ano | findstr /c":10808" >nul 2>nul
+if not errorlevel 1 (
+    set "SYS_PROXY=127.0.0.1:10808"
+    echo [ç½‘ç»œç¯å¢ƒ] è‡ªåŠ¨ä¾¦æµ‹åˆ°æœ¬åœ°è¿è¡Œä¸­çš„ V2Ray æ ¸å¿ƒä»£ç†: 127.0.0.1:10808
+    goto check_proxy_format
+)
+netstat -ano | findstr /c":10809" >nul 2>nul
+if not errorlevel 1 (
+    set "SYS_PROXY=127.0.0.1:10809"
+    echo [ç½‘ç»œç¯å¢ƒ] è‡ªåŠ¨ä¾¦æµ‹åˆ°æœ¬åœ°è¿è¡Œä¸­çš„ V2Ray HTTP ä»£ç†: 127.0.0.1:10809
+    goto check_proxy_format
+)
+netstat -ano | findstr /c":7890" >nul 2>nul
+if not errorlevel 1 (
+    set "SYS_PROXY=127.0.0.1:7890"
+    echo [ç½‘ç»œç¯å¢ƒ] è‡ªåŠ¨ä¾¦æµ‹åˆ°æœ¬åœ°è¿è¡Œä¸­çš„ä»£ç†ç«¯å£: 127.0.0.1:7890
+    goto check_proxy_format
+)
+:check_proxy_format
+
+if "%SYS_PROXY%"=="" goto proxy_done
+echo %SYS_PROXY% | findstr /i "://" >nul
+if not errorlevel 1 goto proxy_ready
+set "SYS_PROXY=http://%SYS_PROXY%"
+:proxy_ready
+set "HTTP_PROXY=%SYS_PROXY%"
+set "HTTPS_PROXY=%SYS_PROXY%"
+set "http_proxy=%SYS_PROXY%"
+set "https_proxy=%SYS_PROXY%"
+set "ALL_PROXY=%SYS_PROXY%"
+set "all_proxy=%SYS_PROXY%"
+echo [ç½‘ç»œç¯å¢ƒ] å·²æˆåŠŸæŒ‚æ¥ç½‘ç»œåŠ é€Ÿä»£ç†: %SYS_PROXY%
+echo [ç½‘ç»œç¯å¢ƒ] GitHub ä¸ Cloudflare å…¨å¥— API / é™æ€èµ„æºç›´ä¼ å·²å…¨é¢å¼€å¯ç½‘ç»œåŠ é€Ÿã€‚
+echo.
+:proxy_done
+
 echo ==================================================
-echo   µ¼º½Õ¾Ò»¼üÈ«×Ô¶¯´î½¨¹¤¾ß (Cloudflare Pages + D1)
-echo   È«³ÌÖ»ĞèÔÚä¯ÀÀÆ÷Àïµã 2 ´ÎÊÚÈ¨, ÆäÓàÈ«×Ô¶¯
+echo   å¯¼èˆªç«™ä¸€é”®å…¨è‡ªåŠ¨æ­å»ºå·¥å…· (Cloudflare Pages + D1)
+echo   å…¨ç¨‹åªéœ€åœ¨æµè§ˆå™¨é‡Œç‚¹ 2 æ¬¡æˆæƒ, å…¶ä½™å…¨è‡ªåŠ¨
 echo ==================================================
 echo.
 
-rem ---------- [0/8] ÊÔÔËĞĞÄ£Ê½¼ì²âÓëÊÚÈ¨Ä£Ê½Ñ¡Ôñ ----------
+rem ---------- [0/8] è¯•è¿è¡Œæ¨¡å¼æ£€æµ‹ä¸æˆæƒæ¨¡å¼é€‰æ‹© ----------
 set DRYRUN=0
+set "SITE_URL="
 if /i "%~1"=="dry" set DRYRUN=1
 
-echo ÇëÑ¡ÔñÔËĞĞÄ£Ê½:
-echo   [1] Ê¶±ğ±¾µØÒÑÊÚÈ¨Ä£Ê½ (ÍÆ¼ö, ×Ô¶¯¼ì²â²¢Ìø¹ıÒÑÊÚÈ¨µÄÕËºÅ)
-echo   [2] È«ĞÂÊÚÈ¨Ä£Ê½ (Ç¿ÖÆÖØĞÂµÇÂ¼ GitHub ºÍ Cloudflare, ÊÊºÏ»»ºÅ»òÖØÖÃ)
+echo è¯·é€‰æ‹©è¿è¡Œæ¨¡å¼:
+echo   [1] è¯†åˆ«æœ¬åœ°å·²æˆæƒæ¨¡å¼ (æ¨è, è‡ªåŠ¨æ£€æµ‹å¹¶è·³è¿‡å·²æˆæƒçš„è´¦å·)
+echo   [2] å…¨æ–°æˆæƒæ¨¡å¼ (å¼ºåˆ¶é‡æ–°ç™»å½• GitHub å’Œ Cloudflare, é€‚åˆæ¢å·æˆ–é‡ç½®)
+echo   [3] ä¸€é”®åˆ é™¤ GitHub / Cloudflare ä¸­æ‰€æœ‰ isoziyuan ç›¸å…³é¡¹ç›®
+echo   [4] ä¸€é”®æ¸…é™¤ GitHub å’Œ Cloudflare æ‰€æœ‰ç™»å½•çŠ¶æ€
 echo.
 set AUTH_FORCE=0
+set CLEANUP_MODE=0
+set LOGOUT_MODE=0
 if "%DRYRUN%"=="1" (
-    echo   [ÊÔÔËĞĞ] Ä¬ÈÏÊ¹ÓÃÊ¶±ğÄ£Ê½ [1]
+    echo   [è¯•è¿è¡Œ] é»˜è®¤ä½¿ç”¨è¯†åˆ«æ¨¡å¼ [1]
     goto step_env
 )
-choice /c 12 /m "ÇëÊäÈëÑ¡Ïî [1 »ò 2]: "
-if errorlevel 2 (
-    set AUTH_FORCE=1
-    echo   ÒÑÑ¡Ôñ: [2] È«ĞÂÊÚÈ¨Ä£Ê½
-) else (
-    set AUTH_FORCE=0
-    echo   ÒÑÑ¡Ôñ: [1] Ê¶±ğ±¾µØÒÑÊÚÈ¨Ä£Ê½
-)
-echo.
+choice /c 1234 /m "è¯·è¾“å…¥é€‰é¡¹ [1ã€2ã€3 æˆ– 4]: "
+if errorlevel 4 goto choose_logout
+if errorlevel 3 goto choose_cleanup
+if errorlevel 2 goto choose_force
+set AUTH_FORCE=0
+echo   å·²é€‰æ‹©: [1] è¯†åˆ«æœ¬åœ°å·²æˆæƒæ¨¡å¼
+goto step_env
+
+:choose_logout
+set LOGOUT_MODE=1
+echo   å·²é€‰æ‹©: [4] æ¸…é™¤æ‰€æœ‰ç™»å½•çŠ¶æ€
+goto step_env
+
+:choose_cleanup
+set CLEANUP_MODE=1
+echo   å·²é€‰æ‹©: [3] æ¸…ç†æ‰€æœ‰ isoziyuan è¿œç¨‹èµ„æº
+goto step_env
+
+:choose_force
+set AUTH_FORCE=1
+echo   å·²é€‰æ‹©: [2] å…¨æ–°æˆæƒæ¨¡å¼
+goto step_env
 
 :step_env
 
-rem ---------- [1/8] »·¾³¼ì²â: git / node / gh ----------
-echo [1/8] ¼ì²âÔËĞĞ»·¾³ (Git / Node.js / GitHub CLI) ...
+
+rem ---------- [1/8] ç¯å¢ƒæ£€æµ‹: git / node / gh ----------
+echo [1/8] æ£€æµ‹è¿è¡Œç¯å¢ƒ (Git / Node.js / GitHub CLI) ...
 set MISSING=0
 where git >nul 2>nul
 if errorlevel 1 (
-    echo   [X] Î´¼ì²âµ½ Git
+    echo   [X] æœªæ£€æµ‹åˆ° Git
     set MISSING=1
 ) else (
-    echo   [OK] Git ÒÑ°²×°
+    echo   [OK] Git å·²å®‰è£…
 )
 where node >nul 2>nul
 if errorlevel 1 (
-    echo   [X] Î´¼ì²âµ½ Node.js
+    echo   [X] æœªæ£€æµ‹åˆ° Node.js
     set MISSING=1
 ) else (
-    echo   [OK] Node.js ÒÑ°²×°
+    echo   [OK] Node.js å·²å®‰è£…
 )
 where gh >nul 2>nul
 if errorlevel 1 (
-    echo   [X] Î´¼ì²âµ½ GitHub CLI ^(gh^)
+    echo   [X] æœªæ£€æµ‹åˆ° GitHub CLI ^(gh^)
     set MISSING=1
 ) else (
-    echo   [OK] GitHub CLI ÒÑ°²×°
+    echo   [OK] GitHub CLI å·²å®‰è£…
 )
 
 if "%MISSING%"=="1" goto install_missing
+if "%LOGOUT_MODE%"=="1" goto logout_all
+if "%CLEANUP_MODE%"=="1" goto cleanup_start
 goto step_github
 
 :install_missing
 echo.
-echo ¼ì²âµ½È±ÉÙ×é¼ş, ÊÇ·ñ³¢ÊÔÓÃ winget ×Ô¶¯°²×°? ^(ĞèÒª Win10/11^)
-choice /c YN /m "ÊäÈë Y ×Ô¶¯°²×°, N ÍË³öºóÊÖ¶¯°²×°"
+echo æ£€æµ‹åˆ°ç¼ºå°‘ç»„ä»¶, æ˜¯å¦å°è¯•ç”¨ winget è‡ªåŠ¨å®‰è£…? ^(éœ€è¦ Win10/11^)
+choice /c YN /m "è¾“å…¥ Y è‡ªåŠ¨å®‰è£…, N é€€å‡ºåæ‰‹åŠ¨å®‰è£…"
 if errorlevel 2 goto abort_install
-echo ÕıÔÚÍ¨¹ı winget °²×°È±Ê§×é¼ş (¿ÉÄÜĞèÒª¼¸·ÖÖÓ) ...
+echo æ­£åœ¨é€šè¿‡ winget å®‰è£…ç¼ºå¤±ç»„ä»¶ (å¯èƒ½éœ€è¦å‡ åˆ†é’Ÿ) ...
 where git >nul 2>nul
 if errorlevel 1 winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
 where node >nul 2>nul
@@ -82,260 +153,721 @@ if errorlevel 1 winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreeme
 where gh >nul 2>nul
 if errorlevel 1 winget install --id GitHub.cli -e --accept-source-agreements --accept-package-agreements
 echo.
-echo [ÌáÊ¾] ×é¼ş°²×°Íê³É¡£Èç¹û±¾´°¿ÚÈÔÌáÊ¾ÕÒ²»µ½ÃüÁî,
-echo        Çë¹Ø±Õ±¾´°¿ÚÖØĞÂË«»÷ÔËĞĞ½Å±¾ ^(Ë¢ĞÂ»·¾³±äÁ¿^)¡£
+echo [æç¤º] ç»„ä»¶å®‰è£…å®Œæˆã€‚å¦‚æœæœ¬çª—å£ä»æç¤ºæ‰¾ä¸åˆ°å‘½ä»¤,
+echo        è¯·å…³é—­æœ¬çª—å£é‡æ–°åŒå‡»è¿è¡Œè„šæœ¬ ^(åˆ·æ–°ç¯å¢ƒå˜é‡^)ã€‚
 pause
 exit /b 0
 
 :abort_install
-echo ÇëÊÖ¶¯°²×°ÒÔÏÂ×é¼şºóÖØĞÂÔËĞĞ±¾½Å±¾:
+echo è¯·æ‰‹åŠ¨å®‰è£…ä»¥ä¸‹ç»„ä»¶åé‡æ–°è¿è¡Œæœ¬è„šæœ¬:
 echo   Git:      https://git-scm.com/download/win
-echo   Node.js:  https://nodejs.org ^(LTS °æ±¾^)
+echo   Node.js:  https://nodejs.org ^(LTS ç‰ˆæœ¬^)
 echo   gh CLI:   https://cli.github.com
-pause
-exit /b 1
+set "FAIL_REASON=ç¼ºå°‘å¿…è¦ç»„ä»¶ (Git / Node.js / gh CLI), éœ€å…ˆæ‰‹åŠ¨å®‰è£…"
+goto fail_restart
 
-rem ---------- [2/8] GitHub ÊÚÈ¨ ----------
+rem ---------- [2/8] GitHub æˆæƒ ----------
 :step_github
 echo.
 if "%DRYRUN%"=="1" goto step_github_do
-if "%AUTH_FORCE%"=="0" (
-    gh auth status >nul 2>nul
-    if not errorlevel 1 (
-        echo   [OK] ¼ì²âµ½±¾»úÒÑÓĞ GitHub ÊÚÈ¨, Ìø¹ıµÇÂ¼²½Öè
-        goto step_fork
-    )
+if "%AUTH_FORCE%"=="1" goto step_github_force
+gh auth status >nul 2>nul
+if not errorlevel 1 (
+    echo   [OK] æ£€æµ‹åˆ°æœ¬æœºå·²æœ‰ GitHub æˆæƒ, è·³è¿‡ç™»å½•æ­¥éª¤
+    goto step_fork
 )
-:step_github_do
-echo [2/8] GitHub ÊÚÈ¨ ¡ª Çë°´ÏÂÃæ 3 ²½²Ù×÷:
+goto step_github_do
+
+:step_github_force
+echo [æç¤º] æ­£åœ¨é€€å‡ºå½“å‰å·²ç™»å½•çš„ GitHub æ—§è´¦å·...
+call gh auth logout --hostname github.com 2>nul
+echo [OK] å·²æ¸…ç†æ—§ GitHub ç™»å½•çŠ¶æ€ï¼Œå‡†å¤‡å¼€å§‹å…¨æ–°ç™»å½•ã€‚
 echo.
-echo   µÚ 1 ²½: ÆÁÄ»ÂíÉÏ»áÏÔÊ¾Ò»¸öÒ»´ÎĞÔ´úÂë, ĞÎÈç XXXX-XXXX
-echo           ^(Ó¢ÎÄÌáÊ¾ First copy your one-time code^), ÇëÏÈÑ¡ÖĞËü°´»Ø³µ¸´ÖÆ
-echo   µÚ 2 ²½: ¿´µ½Ó¢ÎÄÌáÊ¾ Press Enter to open ... Ê±, °´Ò»ÏÂ»Ø³µ¼ü,
-echo           »á×Ô¶¯´ò¿ªä¯ÀÀÆ÷½øÈë GitHub µÇÂ¼Ò³ ^(²»ÊÇ¿¨ËÀ, ¾ÍÊÇÔÚµÈÄã°´¼ü^)
-echo   µÚ 3 ²½: ÔÚä¯ÀÀÆ÷µÇÂ¼ GitHub ÕËºÅ, ÊäÈë¸Õ²Å¸´ÖÆµÄ´úÂë,
-echo           µã»÷ Authorize ÊÚÈ¨, È»ºó»Øµ½±¾´°¿Ú¼ÌĞø
+
+:step_github_do
+echo [2/8] GitHub æˆæƒ â€” è¯·æŒ‰ä¸‹é¢ 3 æ­¥æ“ä½œ:
+echo.
+echo   ç¬¬ 1 æ­¥: å±å¹•é©¬ä¸Šä¼šæ˜¾ç¤ºä¸€ä¸ªä¸€æ¬¡æ€§ä»£ç , å½¢å¦‚ XXXX-XXXX
+echo           ^(ä»£ç å·²è‡ªåŠ¨å¤åˆ¶åˆ°å‰ªè´´æ¿, æ— éœ€æ‰‹åŠ¨å¤åˆ¶^)
+echo   ç¬¬ 2 æ­¥: çœ‹åˆ°è‹±æ–‡æç¤º Press Enter to open ... æ—¶, æŒ‰ä¸€ä¸‹å›è½¦é”®,
+echo           ä¼šè‡ªåŠ¨æ‰“å¼€æµè§ˆå™¨è¿›å…¥ GitHub ç™»å½•é¡µ ^(ä¸æ˜¯å¡æ­», å°±æ˜¯åœ¨ç­‰ä½ æŒ‰é”®^)
+echo   ç¬¬ 3 æ­¥: åœ¨æµè§ˆå™¨ç™»å½• GitHub è´¦å·, ç²˜è´´ä»£ç  ^(Ctrl+V^),
+echo           ç‚¹å‡» Authorize æˆæƒ, ç„¶åå›åˆ°æœ¬çª—å£ç»§ç»­
 echo.
 echo ----------------------------------------------
-if "%DRYRUN%"=="1" echo   [ÊÔÔËĞĞ] gh auth login --web --git-protocol https
-if "%DRYRUN%"=="0" gh auth login --hostname github.com --git-protocol https --web
-if errorlevel 1 goto fail_github
-echo   [OK] GitHub ÊÚÈ¨³É¹¦
+if "%DRYRUN%"=="1" (
+    echo   [è¯•è¿è¡Œ] gh auth login --web --git-protocol https --clipboard
+    goto step_fork
+)
+rem ---------- è‡ªåŠ¨é‡è¯•æœºåˆ¶: æœ€å¤š 2 æ¬¡å…¨è‡ªåŠ¨æˆæƒ ----------
+set "GH_TRY=0"
+:gh_login_loop
+set /a GH_TRY+=1
+echo.
+echo [GitHub æˆæƒ] ç¬¬ %GH_TRY%/2 æ¬¡å°è¯• ...
+call gh auth login --hostname github.com --git-protocol https --web --clipboard
+call gh auth status >nul 2>nul
+if not errorlevel 1 goto gh_login_ok
+if %GH_TRY% GEQ 2 goto fail_gh_login
+echo   [æç¤º] ç¬¬ %GH_TRY% æ¬¡æˆæƒæœªæˆåŠŸ, 5 ç§’åè‡ªåŠ¨è¿›è¡Œç¬¬ 2 æ¬¡æˆæƒ...
+timeout /t 5 /nobreak >nul 2>nul
+goto gh_login_loop
+
+:gh_login_ok
+echo   [OK] GitHub æˆæƒæˆåŠŸ
+goto step_fork
+
+:fail_gh_login
+echo.
+echo [X] GitHub æˆæƒè¿ç»­ 2 æ¬¡å¤±è´¥ã€‚å¸¸è§åŸå› :
+echo     1. æµè§ˆå™¨æˆæƒé¡µé¢æœªå®Œæˆç™»å½•æˆ–æœªç‚¹å‡» Authorize
+echo     2. ç½‘ç»œ/ä»£ç†æ— æ³•è®¿é—® github.com
+echo     3. ç»ˆç«¯æœªç»§æ‰¿ç³»ç»Ÿä»£ç† ^(è„šæœ¬å·²è‡ªåŠ¨å°è¯•æ³¨å…¥, è‹¥ä»å¤±è´¥è¯·æ£€æŸ¥ä»£ç†è½¯ä»¶^)
+echo æ’æŸ¥åå¯é‡æ–°è¿è¡Œæœ¬è„šæœ¬, å·²å®Œæˆçš„æ­¥éª¤ä¼šè‡ªåŠ¨è·³è¿‡ã€‚
+set "FAIL_REASON=GitHub æˆæƒè¿ç»­ 2 æ¬¡å¤±è´¥"
+goto fail_restart
+
 :step_fork
 echo.
-echo [2/8] ÕıÔÚ×¼±¸ÏîÄ¿´úÂë ...
-rem ³¡¾° A: ÓÃ»§Ö±½ÓÔÚ½âÑ¹/¿ËÂ¡µÄ²Ö¿â¸ùÄ¿Â¼ÏÂÔËĞĞ±¾½Å±¾
+echo [2/8] æ­£åœ¨å‡†å¤‡é¡¹ç›®ä»£ç  ...
+rem åœºæ™¯ A: ç”¨æˆ·ç›´æ¥åœ¨è§£å‹/å…‹éš†çš„ä»“åº“æ ¹ç›®å½•ä¸‹è¿è¡Œæœ¬è„šæœ¬
 if exist "wrangler.jsonc" if exist "schema.sql" (
-    echo   [OK] ¼ì²âµ½µ±Ç°Ä¿Â¼ÒÑÊÇµ¼º½Õ¾Ô´ÂëÄ¿Â¼, ÎŞĞèÖØ¸´¿ËÂ¡
+    echo   [OK] æ£€æµ‹åˆ°å½“å‰ç›®å½•å·²æ˜¯å¯¼èˆªç«™æºç ç›®å½•, æ— éœ€é‡å¤å…‹éš†
     goto step_cf_login
 )
 
-rem ³¡¾° B: ÓÃ»§ÔÚÍâ²¿Ä¿Â¼ÔËĞĞ, ÇÒÒÑÓĞ isoziyuan-nav ×ÓÎÄ¼ş¼Ğ
+rem åœºæ™¯ B: ç”¨æˆ·åœ¨å¤–éƒ¨ç›®å½•è¿è¡Œ, ä¸”å·²æœ‰ isoziyuan-nav å­æ–‡ä»¶å¤¹
 if exist "isoziyuan-nav\wrangler.jsonc" (
-    echo   [ÌáÊ¾] ¼ì²âµ½ÒÑÓĞÍêÕû´úÂëÄ¿Â¼, Ö±½Ó¸´ÓÃ
+    echo   [æç¤º] æ£€æµ‹åˆ°å·²æœ‰å®Œæ•´ä»£ç ç›®å½•, ç›´æ¥å¤ç”¨
     cd isoziyuan-nav
-    echo   [OK] ÒÑ½øÈë %cd%
+    echo   [OK] å·²è¿›å…¥ %cd%
     goto step_cf_login
 )
 if "%DRYRUN%"=="1" goto fork_done
-rem Ê¶±ğµ±Ç°ÊÚÈ¨ÕËºÅ: ²Ö¿â×÷Õß±¾ÈËÔËĞĞÊ± GitHub ²»ÔÊĞí Fork ×Ô¼ºµÄ²Ö¿â
+rem è¯†åˆ«å½“å‰æˆæƒè´¦å·: ä»“åº“ä½œè€…æœ¬äººè¿è¡Œæ—¶ GitHub ä¸å…è®¸ Fork è‡ªå·±çš„ä»“åº“
 set "GH_USER="
 for /f "usebackq delims=" %%u in (`gh api user -q .login 2^>nul`) do set "GH_USER=%%u"
 if "%GH_USER%"=="yys9253462-gif" goto fork_owner
-echo   ÕıÔÚ Fork ²Ö¿âµ½ÄãµÄ GitHub ÕËºÅ ^(%GH_USER%^) ...
+echo   æ­£åœ¨ Fork ä»“åº“åˆ°ä½ çš„ GitHub è´¦å· ^(%GH_USER%^) ...
 gh repo fork yys9253462-gif/isoziyuan-nav --clone
 if not errorlevel 1 goto fork_done
-echo   [ÌáÊ¾] Fork Î´³É¹¦, ¸ÄÎªÖ±½Ó¿ËÂ¡²Ö¿â ...
+echo   [æç¤º] Fork æœªæˆåŠŸ, æ”¹ä¸ºç›´æ¥å…‹éš†ä»“åº“ ...
 if not "%GH_USER%"=="" git clone --depth 1 https://github.com/%GH_USER%/isoziyuan-nav.git 2>nul
 if exist "isoziyuan-nav" goto fork_done
 git clone --depth 1 https://github.com/yys9253462-gif/isoziyuan-nav.git
 goto fork_done
 
 :fork_owner
-echo   [ÌáÊ¾] µ±Ç°ÕËºÅ¾ÍÊÇ²Ö¿â×÷Õß, ÎŞĞè Fork, Ö±½Ó¿ËÂ¡
+echo   [æç¤º] å½“å‰è´¦å·å°±æ˜¯ä»“åº“ä½œè€…, æ— éœ€ Fork, ç›´æ¥å…‹éš†
 git clone --depth 1 https://github.com/yys9253462-gif/isoziyuan-nav.git
 
 :fork_done
 if "%DRYRUN%"=="1" goto step_cf_login
 if not exist "isoziyuan-nav" goto fail_github
 cd isoziyuan-nav
-echo   [OK] ´úÂëÒÑ¿ËÂ¡µ½ %cd%
+echo   [OK] ä»£ç å·²å…‹éš†åˆ° %cd%
 goto step_cf_login
 
 :fail_github
 echo.
-echo [X] »ñÈ¡²Ö¿â´úÂëÊ§°Ü, ³£¼ûÔ­Òò:
-echo     1. ÍøÂçÎŞ·¨·ÃÎÊ github.com ^(Çë¼ì²é´úÀí/VPN ºóÖØĞÂÔËĞĞ^)
-echo     2. GitHub ÊÚÈ¨ÒÑ¹ıÆÚ ^(ÔËĞĞ: gh auth login ÖØĞÂÊÚÈ¨^)
-echo     3. Ä¿±êÎÄ¼ş¼ĞÀïÒÑÓĞÍ¬ÃûÎÄ¼ş³åÍ»
-echo ĞŞ¸´ºóÖØĞÂË«»÷ÔËĞĞ±¾½Å±¾¼´¿É, ÒÑÍê³ÉµÄÊÚÈ¨»á×Ô¶¯Ìø¹ı¡£
-pause
-exit /b 1
+echo [X] è·å–ä»“åº“ä»£ç å¤±è´¥, å¸¸è§åŸå› :
+echo     1. ç½‘ç»œæ— æ³•è®¿é—® github.com ^(è¯·æ£€æŸ¥ä»£ç†/VPN åé‡æ–°è¿è¡Œ^)
+echo     2. GitHub æˆæƒå·²è¿‡æœŸ ^(è¿è¡Œ: gh auth login é‡æ–°æˆæƒ^)
+echo     3. ç›®æ ‡æ–‡ä»¶å¤¹é‡Œå·²æœ‰åŒåæ–‡ä»¶å†²çª
+echo ä¿®å¤åé‡æ–°åŒå‡»è¿è¡Œæœ¬è„šæœ¬å³å¯, å·²å®Œæˆçš„æˆæƒä¼šè‡ªåŠ¨è·³è¿‡ã€‚
+set "FAIL_REASON=è·å–ä»“åº“ä»£ç å¤±è´¥"
+goto fail_restart
 
-rem ---------- [3/8] Cloudflare ÊÚÈ¨ ----------
+rem ---------- [3/8] Cloudflare æˆæƒ ----------
 :step_cf_login
 echo.
 if "%DRYRUN%"=="1" goto step_cf_do
-if "%AUTH_FORCE%"=="0" (
-    call npx wrangler whoami >nul 2>nul
-    if not errorlevel 1 (
-        echo   [OK] ¼ì²âµ½±¾»úÒÑÓĞ Cloudflare ÊÚÈ¨, Ìø¹ıµÇÂ¼²½Öè
-        goto step_d1
-    )
-)
-:step_cf_do
-echo [3/8] Cloudflare ÊÚÈ¨ ^(»á´ò¿ªä¯ÀÀÆ÷, µÇÂ¼ÄãµÄ Cloudflare ÕËºÅ²¢µã»÷ Allow^) ...
-if "%DRYRUN%"=="1" (
-    echo   [ÊÔÔËĞĞ] npx wrangler login
+if "%AUTH_FORCE%"=="1" goto step_cf_force
+call :check_cf_auth
+if "%CF_AUTH_OK%"=="1" (
+    echo   [OK] æ£€æµ‹åˆ°æœ¬æœºå·²æœ‰ Cloudflare æˆæƒ, è·³è¿‡ç™»å½•æ­¥éª¤
     goto step_d1
 )
+goto step_cf_do
+
+:step_cf_force
+echo [æç¤º] æ­£åœ¨é€€å‡ºå½“å‰å·²ç™»å½•çš„ Cloudflare æ—§è´¦å·...
+call npx wrangler logout 2>nul
+echo [OK] å·²æ¸…ç†æ—§ Cloudflare ç™»å½•çŠ¶æ€ï¼Œå‡†å¤‡å¼€å§‹å…¨æ–°ç™»å½•ã€‚
+echo.
+
+:step_cf_do
+echo [3/8] Cloudflare æˆæƒ ^(ä¼šæ‰“å¼€æµè§ˆå™¨, ç™»å½•ä½ çš„ Cloudflare è´¦å·å¹¶ç‚¹å‡» Allow^) ...
+if "%DRYRUN%"=="1" (
+    echo   [è¯•è¿è¡Œ] npx wrangler login
+    goto step_d1
+)
+rem ---------- è‡ªåŠ¨é‡è¯•æœºåˆ¶: æœ€å¤š 2 æ¬¡å…¨è‡ªåŠ¨æˆæƒ ----------
+set "CF_TRY=0"
+:cf_login_loop
+set /a CF_TRY+=1
+if %CF_TRY% GTR 1 (
+    echo   [æç¤º] æ­£åœ¨æ¸…ç†ä¸Šæ¬¡æˆæƒçš„æ®‹ç•™çŠ¶æ€, ç„¶åé‡æ–°æˆæƒ...
+    call npx wrangler logout >nul 2>nul
+    echo.
+)
+echo [Cloudflare æˆæƒ] ç¬¬ %CF_TRY%/2 æ¬¡å°è¯• ...
 call npx wrangler login
-if errorlevel 1 goto fail_cf
+rem ç™»å½•å‘½ä»¤å’Œ whoami çš„é€€å‡ºç éƒ½ä¸å¯é ï¼Œå¿…é¡»æ£€æŸ¥å®é™…è¾“å‡º
+call :check_cf_auth
+if "%CF_AUTH_OK%"=="1" goto cf_login_ok
+if %CF_TRY% GEQ 2 goto fail_cf
+echo   [æç¤º] ç¬¬ %CF_TRY% æ¬¡æˆæƒæœªæˆåŠŸ, 5 ç§’åè‡ªåŠ¨è¿›è¡Œç¬¬ 2 æ¬¡æˆæƒ...
+timeout /t 5 /nobreak >nul 2>nul
+goto cf_login_loop
+
+:cf_login_ok
+echo   [OK] Cloudflare æˆæƒéªŒè¯é€šè¿‡
 call npx wrangler whoami
 goto step_d1
 
 :fail_cf
 echo.
-echo [X] Cloudflare ÊÚÈ¨Ê§°Ü¡£Çë¼ì²éÍøÂç»ò´úÀíºóÖØĞÂÔËĞĞ±¾½Å±¾¡£
-pause
-exit /b 1
+echo [X] Cloudflare æˆæƒè¿ç»­ 2 æ¬¡å¤±è´¥ã€‚å¸¸è§åŸå› :
+echo     1. æµè§ˆå™¨æˆæƒé¡µé¢æ²¡æœ‰ç‚¹å‡» Allow å°±å…³é—­äº†
+echo     2. ç½‘ç»œæˆ–ä»£ç†å¼‚å¸¸, æœªæ”¶åˆ°æˆæƒå›è°ƒ
+echo     3. æœ¬æœº 8976 ç«¯å£è¢«å ç”¨, å¯¼è‡´å›è°ƒå¤±è´¥
+echo æ’æŸ¥åå¯é‡æ–°è¿è¡Œæœ¬è„šæœ¬, å·²å®Œæˆçš„æ­¥éª¤ä¼šè‡ªåŠ¨è·³è¿‡ã€‚
+set "FAIL_REASON=Cloudflare æˆæƒè¿ç»­ 2 æ¬¡å¤±è´¥"
+goto fail_restart
 
-rem ---------- [4/8] ´´½¨ D1 Êı¾İ¿â ----------
+rem ---------- [4/8] åˆ›å»º D1 æ•°æ®åº“ ----------
 :step_d1
 echo.
-echo [4/8] ´´½¨Ãâ·ÑµÄ D1 Êı¾İ¿â: isoziyuan-nav-db ...
+set "D1_NAME=isoziyuan-nav-db"
+echo [4/8] æ£€æŸ¥ D1 æ•°æ®åº“: %D1_NAME% ...
 if "%DRYRUN%"=="1" (
-    echo   [ÊÔÔËĞĞ] npx wrangler d1 create isoziyuan-nav-db
+    echo   [è¯•è¿è¡Œ] npx wrangler d1 create %D1_NAME%
     goto step_schema
 )
-call npx wrangler d1 create isoziyuan-nav-db > d1_create_result.txt 2>&1
-if errorlevel 1 goto fail_d1
-findstr /c:"database_id" d1_create_result.txt
-del d1_create_result.txt
-echo   [OK] Êı¾İ¿â´´½¨³É¹¦
-goto step_schema
-
-:fail_d1
-echo.
-echo [ÌáÊ¾] D1 Êı¾İ¿â´´½¨Ê§°Ü ^(¿ÉÄÜÍ¬ÃûÊı¾İ¿âÒÑ´æÔÚ, ³¢ÊÔ¸´ÓÃ^) ...
+rem æ¯æ¬¡éƒ½ä»å½“å‰ Cloudflare è´¦æˆ·è¯»å–çœŸå® IDï¼Œé¿å…ä½¿ç”¨æ—§çš„å¤±æ•ˆ ID
+call :lookup_db_id
+if defined NEW_DB_ID (
+    echo   [OK] æ£€æµ‹åˆ°æ•°æ®åº“å·²å­˜åœ¨ï¼ŒçœŸå® ID: %NEW_DB_ID%
+    goto step_schema
+)
+if /i "%DB_LOOKUP_STATUS%"=="ERROR" echo   [æç¤º] æ•°æ®åº“åˆ—è¡¨æŸ¥è¯¢å¤±è´¥ï¼Œç›´æ¥å°è¯•åˆ›å»ºæ•°æ®åº“...
+call npx wrangler d1 create %D1_NAME% --binding NAV_DB --update-config > d1_create_result.txt 2>&1
+if errorlevel 1 goto handle_d1_err
+call :extract_uuid_from_file "d1_create_result.txt"
 if exist d1_create_result.txt del d1_create_result.txt
+if not defined NEW_DB_ID call :lookup_db_id
+if not defined NEW_DB_ID goto fail_dbid
+echo   [OK] æ•°æ®åº“åˆ›å»ºæˆåŠŸ
 goto step_schema
 
-rem ---------- [5/8] ĞŞÕı wrangler.jsonc ÖĞµÄÊı¾İ¿â ID ²¢³õÊ¼»¯±í ----------
+:handle_d1_err
+findstr /i /c:"already exists" d1_create_result.txt >nul 2>nul
+if not errorlevel 1 (
+    echo   [OK] æ£€æµ‹åˆ°æ•°æ®åº“å·²å­˜åœ¨ï¼Œé‡æ–°è¯»å–çœŸå® IDã€‚
+    if exist d1_create_result.txt del d1_create_result.txt
+    goto lookup_existing_d1
+)
+findstr /i /c:"A database with the name" d1_create_result.txt >nul 2>nul
+if not errorlevel 1 (
+    echo   [OK] æ£€æµ‹åˆ°æ•°æ®åº“å·²å­˜åœ¨ï¼Œé‡æ–°è¯»å–çœŸå® IDã€‚
+    if exist d1_create_result.txt del d1_create_result.txt
+    goto lookup_existing_d1
+)
+findstr /i /c:"logged in" d1_create_result.txt >nul 2>nul
+if not errorlevel 1 goto fail_need_cf_login
+findstr /i /c:"authentication" d1_create_result.txt >nul 2>nul
+if not errorlevel 1 goto fail_need_cf_login
+echo.
+echo [è­¦å‘Š] D1 æ•°æ®åº“åˆ›å»ºå¼‚å¸¸:
+type d1_create_result.txt
+if exist d1_create_result.txt del d1_create_result.txt
+echo   å°è¯•ç»§ç»­æ£€æµ‹æ•°æ®åº“ç»‘å®š...
+goto lookup_existing_d1
+
+:lookup_existing_d1
+set "NEW_DB_ID="
+set "DBINFO_TRY=0"
+:lookup_existing_d1_loop
+set /a DBINFO_TRY+=1
+call :lookup_db_id
+if defined NEW_DB_ID goto step_schema
+if %DBINFO_TRY% GEQ 3 goto fail_dbid
+echo   [æç¤º] æ•°æ®åº“ ID æš‚æ—¶æœªè¯»å–åˆ°ï¼Œ3 ç§’åé‡è¯•...
+timeout /t 3 /nobreak >nul 2>nul
+goto lookup_existing_d1_loop
+
+:fail_need_cf_login
+echo.
+if exist d1_create_result.txt del d1_create_result.txt
+if "%CF_REAUTH_TRIED%"=="1" goto fail_need_cf_login_final
+set "CF_REAUTH_TRIED=1"
+echo [æç¤º] Cloudflare ç™»å½•çŠ¶æ€æ— æ•ˆï¼Œæ­£åœ¨è‡ªåŠ¨é‡æ–°æˆæƒ...
+goto step_cf_do
+
+:fail_need_cf_login_final
+echo [X] æ£€æµ‹åˆ° Cloudflare ç™»å½•çŠ¶æ€æ— æ•ˆ, æ— æ³•ç»§ç»­åˆ›å»ºæ•°æ®åº“ã€‚
+set "FAIL_REASON=Cloudflare ç™»å½•çŠ¶æ€æ— æ•ˆ"
+goto fail_restart
+
+rem ---------- [5/8] ä¿®æ­£ wrangler.jsonc ä¸­çš„æ•°æ®åº“ ID å¹¶åˆå§‹åŒ–è¡¨ ----------
 :step_schema
 echo.
-echo [5/8] Ğ£×¼Êı¾İ¿â°ó¶¨²¢³õÊ¼»¯Êı¾İ±í ...
+echo [5/8] æ ¡å‡†æ•°æ®åº“ç»‘å®šå¹¶åˆå§‹åŒ–æ•°æ®è¡¨ ...
 if "%DRYRUN%"=="1" (
-    echo   [ÊÔÔËĞĞ] ĞŞÕı wrangler.jsonc µÄ database_id + Ö´ĞĞ schema.sql
+    echo   [è¯•è¿è¡Œ] ä¿®æ­£ wrangler.jsonc çš„ database_id + æ‰§è¡Œ schema.sql
     goto step_project
 )
-rem ÎÈ½¡»ñÈ¡ĞÂÊı¾İ¿â ID ²¢Ğ´Èë wrangler.jsonc (PowerShell ½âÎö JSON, ±ÜÃâ token ÇĞ·Ö´íÎó)
-set "NEW_DB_ID="
-for /f "delims=" %%a in ('powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; $j = (npx wrangler d1 info isoziyuan-nav-db --json 2^>$null | ConvertFrom-Json); if($j.uuid){$j.uuid} elseif($j.database_id){$j.database_id}"') do set "NEW_DB_ID=%%a"
-if "%NEW_DB_ID%"=="" (
-    for /f "tokens=2 delims=: " %%a in ('call npx wrangler d1 info isoziyuan-nav-db --json 2^>nul ^| findstr /i "uuid database_id"') do set NEW_DB_ID=%%a
-    set NEW_DB_ID=%NEW_DB_ID:"=%
-    set NEW_DB_ID=%NEW_DB_ID:,=%
-)
-if "%NEW_DB_ID%"=="" goto fail_dbid
-echo   ĞÂÊı¾İ¿â ID: %NEW_DB_ID%
-powershell -NoProfile -Command "$f='wrangler.jsonc'; $enc=[System.Text.Encoding]::UTF8; $t=[IO.File]::ReadAllText($f, $enc); $t=[regex]::Replace($t,'\"database_id\":\s*\"[0-9a-fA-F-]+\"','\"database_id\": \"%NEW_DB_ID%\"'); [IO.File]::WriteAllText($f, $t, $enc)"
-echo   [OK] wrangler.jsonc ÒÑÖ¸ÏòÄãµÄ×¨ÊôÊı¾İ¿â
+rem ç¨³å¥è·å–æ•°æ®åº“ ID: ä¼˜å…ˆå¤ç”¨ [4/8] å»ºåº“è¾“å‡ºä¸­æå–çš„æœ¬åœ° ID (é›¶ç½‘ç»œè¯·æ±‚)
+if defined NEW_DB_ID goto validate_db_id
+set "DBINFO_TRY=0"
+:dbinfo_loop
+set /a DBINFO_TRY+=1
+echo   [æŸ¥è¯¢] æ­£åœ¨è·å–æ•°æ®åº“ä¿¡æ¯ (ç¬¬ %DBINFO_TRY%/2 æ¬¡å°è¯•) ...
+rem å¿…é¡»ä»è´¦æˆ·æ¸…å•æŒ‰åç§°åŒ¹é…ï¼›d1 info ä¼šè¢«æ—§ wrangler ç»‘å®šè¯¯å¯¼
+call :lookup_db_id
+if defined NEW_DB_ID goto validate_db_id
+if %DBINFO_TRY% GEQ 2 goto fail_dbid
+echo   [æç¤º] æŸ¥è¯¢æœªæˆåŠŸ, 3 ç§’åè‡ªåŠ¨é‡è¯•...
+timeout /t 3 /nobreak >nul 2>nul
+goto dbinfo_loop
 
-call npx wrangler d1 execute isoziyuan-nav-db --remote --file schema.sql -y
+:validate_db_id
+rem æ ¡éªŒ ID åˆæ³•æ€§ (ä»…å…è®¸åå…­è¿›åˆ¶å­—ç¬¦å’Œè¿å­—ç¬¦), é˜²æ­¢æŠŠåƒåœ¾å€¼å†™è¿›é…ç½®
+echo %NEW_DB_ID%| findstr /r /i /c:"^[0-9a-f][0-9a-f-]*" >nul
+if errorlevel 1 goto fail_dbid
+echo   æ–°æ•°æ®åº“ ID: %NEW_DB_ID%
+powershell -NoProfile -Command "$f='wrangler.jsonc'; $t=[IO.File]::ReadAllText($f); $t=[regex]::Replace($t,'(?i)(database_id[^0-9a-f]*)([0-9a-f-]{36})',{param($m) $m.Groups[1].Value+$env:NEW_DB_ID}); [IO.File]::WriteAllText($f,$t)"
+findstr /i /c:"%NEW_DB_ID%" wrangler.jsonc >nul 2>nul
+if errorlevel 1 goto fail_config_dbid
+call npx wrangler d1 info NAV_DB --json > d1_verify_result.txt 2>&1
+if errorlevel 1 goto fail_config_dbid
+findstr /i /c:"%NEW_DB_ID%" d1_verify_result.txt >nul 2>nul
+if errorlevel 1 goto fail_config_dbid
+if exist d1_verify_result.txt del d1_verify_result.txt
+echo   [OK] wrangler.jsonc å·²æŒ‡å‘ä½ çš„ä¸“å±æ•°æ®åº“
+
+call npx wrangler d1 execute NAV_DB --remote --file schema.sql --yes
 if errorlevel 1 goto fail_schema
-echo   [OK] Êı¾İ±í³õÊ¼»¯Íê³É
+call npx wrangler d1 execute NAV_DB --remote --command "SELECT count(*) AS table_count FROM sqlite_master WHERE type='table'" --json > d1_schema_verify.txt 2>&1
+if errorlevel 1 goto fail_schema
+findstr /i /c:"table_count" d1_schema_verify.txt >nul 2>nul
+if errorlevel 1 goto fail_schema
+if exist d1_schema_verify.txt del d1_schema_verify.txt
+echo   [OK] æ•°æ®è¡¨åˆå§‹åŒ–å®Œæˆ
 goto step_project
 
 :fail_dbid
-echo [X] Î´ÄÜ»ñÈ¡ĞÂÊı¾İ¿â ID, Çë½ØÍ¼ÁªÏµ×÷Õß¡£
-pause
-exit /b 1
+echo [X] è·å–æ•°æ®åº“ ID å¤±è´¥æˆ– ID æ ¼å¼éæ³•, å¸¸è§åŸå› :
+echo     1. Cloudflare æœªç™»å½•æˆ–æˆæƒå¤±æ•ˆ ^(é‡æ–°è¿è¡Œè„šæœ¬å®Œæˆæˆæƒ^)
+echo     2. ç½‘ç»œå¼‚å¸¸, æŸ¥è¯¢æ•°æ®åº“ä¿¡æ¯è¶…æ—¶
+echo     3. wrangler ç‰ˆæœ¬è¾“å‡ºæ ¼å¼å˜åŒ–
+echo æ’æŸ¥åé‡æ–°è¿è¡Œæœ¬è„šæœ¬å³å¯ã€‚
+set "FAIL_REASON=è·å–æ•°æ®åº“ ID å¤±è´¥æˆ– ID æ ¼å¼éæ³•"
+goto fail_restart
 
 :fail_schema
-echo [X] Êı¾İ±í³õÊ¼»¯Ê§°Ü, Çë¼ì²éÍøÂçºóÖØĞÂÔËĞĞ ^(»á×Ô¶¯Ìø¹ıÒÑÍê³É²½Öè^)¡£
-pause
-exit /b 1
+echo [X] æ•°æ®è¡¨åˆå§‹åŒ–å¤±è´¥, è¯·æ£€æŸ¥ç½‘ç»œåé‡æ–°è¿è¡Œ ^(ä¼šè‡ªåŠ¨è·³è¿‡å·²å®Œæˆæ­¥éª¤^)ã€‚
+set "FAIL_REASON=æ•°æ®è¡¨åˆå§‹åŒ–å¤±è´¥"
+goto fail_restart
 
-rem ---------- [6/8] ´´½¨ Pages ÏîÄ¿ ----------
+:fail_config_dbid
+if exist d1_verify_result.txt (
+    echo [X] æ•°æ®åº“ç»‘å®šéªŒè¯å¤±è´¥ï¼ŒWrangler è¿”å›:
+    type d1_verify_result.txt
+    del d1_verify_result.txt
+)
+set "FAIL_REASON=æ•°æ®åº“ ID å†™å…¥æˆ–éªŒè¯å¤±è´¥"
+goto fail_restart
+
+:lookup_db_id
+rem ä»å½“å‰è´¦æˆ·çš„ D1 æ¸…å•ä¸­æŒ‰åç§°ç²¾ç¡®è·å– UUIDï¼Œä¸è¯»å– wrangler.jsonc çš„æ—§ç»‘å®š
+set "NEW_DB_ID="
+set "DB_LOOKUP_STATUS=ERROR"
+set "DB_LIST_TMP=%TEMP%\nav_d1_list_%RANDOM%_%RANDOM%.json"
+set "DB_ID_TMP=%TEMP%\nav_d1_id_%RANDOM%_%RANDOM%.tmp"
+call npx wrangler d1 list --json > "%DB_LIST_TMP%" 2>nul
+if errorlevel 1 goto lookup_db_cleanup
+set "DB_LOOKUP_STATUS=MISSING"
+powershell -NoProfile -Command "$data=ConvertFrom-Json -InputObject ([IO.File]::ReadAllText('%DB_LIST_TMP%')); foreach($item in @($data)){if($item.name -eq '%D1_NAME%'){[IO.File]::WriteAllText('%DB_ID_TMP%',$item.uuid); break}}" >nul 2>nul
+if exist "%DB_ID_TMP%" set /p NEW_DB_ID=<"%DB_ID_TMP%"
+if defined NEW_DB_ID set "DB_LOOKUP_STATUS=FOUND"
+:lookup_db_cleanup
+if exist "%DB_LIST_TMP%" del "%DB_LIST_TMP%" >nul 2>nul
+if exist "%DB_ID_TMP%" del "%DB_ID_TMP%" >nul 2>nul
+set "DB_LIST_TMP="
+set "DB_ID_TMP="
+if not defined NEW_DB_ID goto :eof
+rem ä¸¥æ ¼æ ¡éªŒæå–åˆ°çš„ ID æ˜¯å¦ä¸ºåˆæ³• UUID æ ¼å¼ (32+ å­—ç¬¦)
+echo %NEW_DB_ID%| findstr /r /i /c:"^[0-9a-f][0-9a-f-]*" >nul
+if errorlevel 1 set "NEW_DB_ID="
+goto :eof
+
+:check_cf_auth
+set "CF_AUTH_OK=0"
+set "CF_AUTH_TMP=%TEMP%\nav_cf_auth_%RANDOM%_%RANDOM%.tmp"
+call npx wrangler whoami > "%CF_AUTH_TMP%" 2>&1
+findstr /i /c:"You are logged in" "%CF_AUTH_TMP%" >nul 2>nul
+if not errorlevel 1 set "CF_AUTH_OK=1"
+if exist "%CF_AUTH_TMP%" del "%CF_AUTH_TMP%" >nul 2>nul
+set "CF_AUTH_TMP="
+goto :eof
+
+:extract_uuid_from_file
+set "NEW_DB_ID="
+set "DB_ID_TMP=%TEMP%\nav_d1_create_id_%RANDOM%_%RANDOM%.tmp"
+powershell -NoProfile -Command "$text=[IO.File]::ReadAllText('%~1'); $match=[regex]::Match($text,'(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'); if($match.Success){[IO.File]::WriteAllText('%DB_ID_TMP%',$match.Value)}" >nul 2>nul
+if exist "%DB_ID_TMP%" set /p NEW_DB_ID=<"%DB_ID_TMP%"
+if exist "%DB_ID_TMP%" del "%DB_ID_TMP%" >nul 2>nul
+set "DB_ID_TMP="
+goto :eof
+
+:generate_admin_pass
+set "PASS_TMP=%TEMP%\nav_admin_pass_%RANDOM%_%RANDOM%.tmp"
+powershell -NoProfile -Command "[IO.File]::WriteAllText('%PASS_TMP%','Nav'+[Guid]::NewGuid().ToString('N').Substring(0,10)+'2026')" >nul 2>nul
+if exist "%PASS_TMP%" set /p ADMIN_PASS=<"%PASS_TMP%"
+if exist "%PASS_TMP%" del "%PASS_TMP%" >nul 2>nul
+set "PASS_TMP="
+if not defined ADMIN_PASS set "ADMIN_PASS=NavAdmin2026"
+goto :eof
+
+rem ---------- [6/8] åˆ›å»º Pages é¡¹ç›® ----------
 :step_project
 echo.
-echo [6/8] ´´½¨ Cloudflare Pages ÏîÄ¿: isoziyuan-nav ...
+echo [6/8] åˆ›å»º Cloudflare Pages é¡¹ç›®: isoziyuan-nav ...
 if "%DRYRUN%"=="1" (
-    echo   [ÊÔÔËĞĞ] call npx wrangler pages project create isoziyuan-nav --production-branch main
+    echo   [è¯•è¿è¡Œ] call npx wrangler pages project create isoziyuan-nav --production-branch main
     goto step_password
 )
-call npx wrangler pages project create isoziyuan-nav --production-branch main 2>nul
+call npx wrangler pages project create isoziyuan-nav --production-branch main > pages_create.tmp 2>&1
 if errorlevel 1 (
-    echo   [ÌáÊ¾] ÏîÄ¿¿ÉÄÜÒÑ´æÔÚ, ¼ÌĞøÊ¹ÓÃÏÖÓĞÏîÄ¿¡£
+    findstr /i /c:"already exists" pages_create.tmp >nul 2>nul
+    if not errorlevel 1 (
+        echo   [OK] é¡¹ç›®å·²å­˜åœ¨ï¼Œç»§ç»­ä½¿ç”¨ç°æœ‰é¡¹ç›®ã€‚
+    ) else (
+        type pages_create.tmp
+        if exist pages_create.tmp del pages_create.tmp
+        goto fail_project
+    )
+) else (
+    echo   [OK] Pages é¡¹ç›®åˆ›å»ºæˆåŠŸ
 )
-echo   [OK] Pages ÏîÄ¿¾ÍĞ÷
+if exist pages_create.tmp del pages_create.tmp
 goto step_password
 
-rem ---------- [7/8] ÉèÖÃºóÌ¨¹ÜÀíÃÜÂë ----------
+:fail_project
+echo [X] Pages é¡¹ç›®åˆ›å»ºæˆ–æŸ¥è¯¢å¤±è´¥ã€‚
+set "FAIL_REASON=Cloudflare Pages é¡¹ç›®åˆ›å»ºå¤±è´¥"
+goto fail_restart
+
+rem ---------- [7/8] è®¾ç½®åå°ç®¡ç†å¯†ç  ----------
 :step_password
 echo.
-echo [7/8] ÉèÖÃºóÌ¨¹ÜÀíÃÜÂë ^(ÓÃÓÚµÇÂ¼ /admin ¹ÜÀíÃæ°å^) ...
+echo [7/8] è®¾ç½®åå°ç®¡ç†å¯†ç  ^(ç”¨äºç™»å½• /admin ç®¡ç†é¢æ¿^) ...
+:ask_admin_pass
 set "ADMIN_PASS="
-set /p ADMIN_PASS=ÇëÊäÈëÄãÏëÉèÖÃµÄ¹ÜÀíÃÜÂë ^(×ÖÄ¸ºÍÊı×Ö, Ö±½Ó»Ø³µ×Ô¶¯Éú³ÉËæ»úÃÜÂë^): 
-if "%ADMIN_PASS%"=="" (
-    for /f %%a in ('powershell -NoProfile -Command "-join((48..57)+(65..90)+(97..122) | Get-Random -Count 10 | %%{[char]$_})"') do set "ADMIN_PASS=Nav%%a2026"
+set /p ADMIN_PASS=è¯·è¾“å…¥ 6-64 ä½å­—æ¯æˆ–æ•°å­—å¯†ç  ^(ç›´æ¥å›è½¦è‡ªåŠ¨ç”Ÿæˆ^): 
+if not defined ADMIN_PASS call :generate_admin_pass
+powershell -NoProfile -Command "if($env:ADMIN_PASS -match '^[A-Za-z0-9]{6,64}$'){exit 0}else{exit 1}" >nul 2>nul
+if errorlevel 1 (
+    echo [X] å¯†ç åªèƒ½åŒ…å«å­—æ¯å’Œæ•°å­—ï¼Œé•¿åº¦ä¸º 6-64 ä½ï¼Œè¯·é‡æ–°è¾“å…¥ã€‚
+    goto ask_admin_pass
 )
-echo ÄãµÄºóÌ¨¹ÜÀíÃÜÂë: %ADMIN_PASS%
-echo ^(ÇëÁ¢¼´³­Ğ´±£´æ, ºóÃæ»¹»áÔÙÏÔÊ¾Ò»´Î^)
+echo ä½ çš„åå°ç®¡ç†å¯†ç : %ADMIN_PASS%
+echo ^(è¯·ç«‹å³æŠ„å†™ä¿å­˜, åé¢è¿˜ä¼šå†æ˜¾ç¤ºä¸€æ¬¡^)
 if "%DRYRUN%"=="1" (
-    echo   [ÊÔÔËĞĞ] call npx wrangler pages secret put ADMIN_PASSWORD --project-name isoziyuan-nav
+    echo   [è¯•è¿è¡Œ] call npx wrangler pages secret put ADMIN_PASSWORD --project-name isoziyuan-nav
     goto step_deploy
 )
-powershell -NoProfile -Command "[IO.File]::WriteAllText('adminpass.tmp','%ADMIN_PASS%')"
+powershell -NoProfile -Command "[IO.File]::WriteAllText('adminpass.tmp',$env:ADMIN_PASS,[Text.UTF8Encoding]::new($false))"
 call npx wrangler pages secret put ADMIN_PASSWORD --project-name isoziyuan-nav < adminpass.tmp
 del adminpass.tmp
 if errorlevel 1 goto fail_secret
-echo   [OK] ¹ÜÀíÃÜÂëÒÑ¼ÓÃÜĞ´Èë
+call npx wrangler pages secret list --project-name isoziyuan-nav > secret_verify.tmp 2>&1
+if errorlevel 1 goto fail_secret
+findstr /i /c:"ADMIN_PASSWORD" secret_verify.tmp >nul 2>nul
+if errorlevel 1 goto fail_secret
+if exist secret_verify.tmp del secret_verify.tmp
+call :save_credentials
+echo   [OK] ç®¡ç†å¯†ç å·²å†™å…¥å¹¶éªŒè¯ï¼Œè´¦å·ä¿¡æ¯å·²ä¿å­˜åˆ°æ¡Œé¢
 goto step_deploy
 
 :fail_secret
-echo [X] ÃÜÂëĞ´ÈëÊ§°Ü, ÇëÖØĞÂÔËĞĞ±¾½Å±¾ÖØÊÔ¸Ã²½Öè¡£
-pause
-exit /b 1
+if exist adminpass.tmp del adminpass.tmp >nul 2>nul
+if exist secret_verify.tmp del secret_verify.tmp >nul 2>nul
+echo [X] å¯†ç å†™å…¥å¤±è´¥, è¯·é‡æ–°è¿è¡Œæœ¬è„šæœ¬é‡è¯•è¯¥æ­¥éª¤ã€‚
+set "FAIL_REASON=åå°ç®¡ç†å¯†ç å†™å…¥å¤±è´¥"
+goto fail_restart
 
-rem ---------- [8/8] ²¿ÊğÉÏÏß ----------
+rem ---------- [8/8] éƒ¨ç½²ä¸Šçº¿ ----------
 :step_deploy
 echo.
-echo [8/8] ÕıÔÚ²¿Êğµ½ Cloudflare È«Çò±ßÔµ½Úµã ...
+echo [8/8] æ­£åœ¨éƒ¨ç½²åˆ° Cloudflare å…¨çƒè¾¹ç¼˜èŠ‚ç‚¹ ...
 if "%DRYRUN%"=="1" (
-    echo   [ÊÔÔËĞĞ] npx wrangler pages deploy . --project-name isoziyuan-nav --branch main
+    echo   [è¯•è¿è¡Œ] npx wrangler pages deploy . --project-name isoziyuan-nav --branch main
+    set "SITE_URL=https://your-project.pages.dev"
     goto done
 )
-call npx wrangler pages deploy . --project-name isoziyuan-nav --branch main --commit-dirty=true
-if errorlevel 1 goto fail_deploy
+set "DEPLOY_LOG=%TEMP%\isoziyuan_pages_deploy_%RANDOM%_%RANDOM%.log"
+call npx wrangler pages deploy . --project-name isoziyuan-nav --branch main --commit-dirty=true > "%DEPLOY_LOG%" 2>&1
+set "DEPLOY_EXIT=%errorlevel%"
+if not "%DEPLOY_EXIT%"=="0" goto fail_deploy
+call :extract_pages_url
+if not defined SITE_URL goto fail_deploy_url
+echo   [OK] Cloudflare Pages éƒ¨ç½²æˆåŠŸ
+echo   [OK] å®é™…è®¿é—®åœ°å€: %SITE_URL%
+if exist "%DEPLOY_LOG%" del "%DEPLOY_LOG%" >nul 2>nul
 goto done
 
 :fail_deploy
-echo [X] ²¿ÊğÊ§°Ü, Çë¼ì²éÍøÂçºóÖØĞÂÔËĞĞ±¾½Å±¾¡£
-pause
-exit /b 1
+powershell -NoProfile -Command "$text=[IO.File]::ReadAllText($env:DEPLOY_LOG,[Text.UTF8Encoding]::new($false)); $text=[regex]::Replace($text,[char]27+'\[[0-9;?]*[ -/]*[@-~]',''); [Console]::Write($text)" 2>nul
+if exist "%DEPLOY_LOG%" del "%DEPLOY_LOG%" >nul 2>nul
+echo [X] éƒ¨ç½²å¤±è´¥, è¯·æ£€æŸ¥ç½‘ç»œåé‡æ–°è¿è¡Œæœ¬è„šæœ¬ã€‚
+set "FAIL_REASON=éƒ¨ç½²åˆ° Cloudflare å…¨çƒèŠ‚ç‚¹å¤±è´¥"
+goto fail_restart
 
-rem ---------- Íê³É ----------
+:fail_deploy_url
+if exist "%DEPLOY_LOG%" del "%DEPLOY_LOG%" >nul 2>nul
+echo [X] éƒ¨ç½²å·²ç»å®Œæˆï¼Œä½†æœªèƒ½ä» Wrangler è¾“å‡ºä¸­è¯†åˆ« Pages ç½‘å€ã€‚
+set "FAIL_REASON=æ— æ³•è¯†åˆ« Cloudflare Pages å®é™…ç½‘å€"
+goto fail_restart
+
+:extract_pages_url
+set "URL_RESULT=%TEMP%\isoziyuan_pages_url_%RANDOM%_%RANDOM%.tmp"
+powershell -NoProfile -Command "$text=[IO.File]::ReadAllText($env:DEPLOY_LOG); $m=[regex]::Match($text,'https://[A-Za-z0-9.-]+\.pages\.dev'); if($m.Success){$pageHost=([Uri]$m.Value).Host; $labels=$pageHost.Split('.'); if($labels.Length -ge 4){$pageHost=($labels[1..($labels.Length-1)] -join '.')}; [IO.File]::WriteAllText($env:URL_RESULT,'https://'+$pageHost)}" >nul 2>nul
+if exist "%URL_RESULT%" set /p SITE_URL=<"%URL_RESULT%"
+if exist "%URL_RESULT%" del "%URL_RESULT%" >nul 2>nul
+set "URL_RESULT="
+goto :eof
+
+rem ---------- å®Œæˆ ----------
 :done
 echo.
 echo ==================================================
-echo   ¹§Ï²! µ¼º½Õ¾´î½¨Íê³É!
+echo   æ­å–œ! å¯¼èˆªç«™æ­å»ºå®Œæˆ!
 echo.
-echo   ÄãµÄµ¼º½Õ¾:  https://isoziyuan-nav.pages.dev
-echo   ¹ÜÀíºóÌ¨:    https://isoziyuan-nav.pages.dev/admin
-echo   ºóÌ¨ÃÜÂë:    %ADMIN_PASS%
+echo   ä½ çš„å¯¼èˆªç«™:  %SITE_URL%
+echo   ç®¡ç†åå°:    %SITE_URL%/admin
+echo   åå°å¯†ç :    %ADMIN_PASS%
 echo.
-echo   Ê×´ÎµÇÂ¼ºóÌ¨: µã»÷Ò»´Î [±£´æÈ«²¿ĞŞ¸Ä],
-echo   ¼´¿É°ÑÄ¬ÈÏ·ÖÀàºÍÕ¾µãµ¼ÈëÄã×Ô¼ºµÄÊı¾İ¿â!
+echo   é¦–æ¬¡ç™»å½•åå°: ç‚¹å‡»ä¸€æ¬¡ [ä¿å­˜å…¨éƒ¨ä¿®æ”¹],
+echo   å³å¯æŠŠé»˜è®¤åˆ†ç±»å’Œç«™ç‚¹å¯¼å…¥ä½ è‡ªå·±çš„æ•°æ®åº“!
 echo.
-echo   °ó¶¨¶ÀÁ¢ÓòÃû: Cloudflare ¿ØÖÆÌ¨ - Pages ÏîÄ¿
-echo   - ×Ô¶¨ÒåÓò - ÊäÈëÄãµÄÓòÃû¼´¿É×Ô¶¯½âÎö
+echo   ç»‘å®šç‹¬ç«‹åŸŸå: Cloudflare æ§åˆ¶å° - Pages é¡¹ç›®
+echo   - è‡ªå®šä¹‰åŸŸ - è¾“å…¥ä½ çš„åŸŸåå³å¯è‡ªåŠ¨è§£æ
 echo ==================================================
 echo.
-rem ×Ô¶¯±£´æÒ»·İÆ¾¾İµ½×ÀÃæ, ·ÀÖ¹ÊÖ»¬¹Ø±Õ´°¿Úµ¼ÖÂÃÜÂë¶ªÊ§
-powershell -NoProfile -Command "$dt=[Environment]::GetFolderPath('Desktop'); $p=Join-Path $dt 'µ¼º½Õ¾ºóÌ¨ĞÅÏ¢.txt'; $content="==============================`r`nµ¼º½Õ¾´î½¨ĞÅÏ¢ (ÇëÍ×ÉÆ±£¹Ü)`r`n==============================`r`nµ¼º½Õ¾ÍøÖ·: https://isoziyuan-nav.pages.dev`r`n¹ÜÀíºóÌ¨:   https://isoziyuan-nav.pages.dev/admin`r`nºóÌ¨ÃÜÂë:   %ADMIN_PASS%`r`n´î½¨Ê±¼ä:   " + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss'); [IO.File]::WriteAllText($p, $content, [System.Text.Encoding]::UTF8); Write-Host '  [ÌáÊ¾] ÕËºÅÃÜÂëÒÑ×Ô¶¯±¸·İµ½ÄãµÄ×ÀÃæ: µ¼º½Õ¾ºóÌ¨ĞÅÏ¢.txt'"
+rem è‡ªåŠ¨ä¿å­˜ä¸€ä»½å‡­æ®åˆ°æ¡Œé¢, é˜²æ­¢æ‰‹æ»‘å…³é—­çª—å£å¯¼è‡´å¯†ç ä¸¢å¤±
+call :save_credentials
+echo   [æç¤º] è´¦å·å¯†ç å·²è‡ªåŠ¨å¤‡ä»½åˆ°ä½ çš„æ¡Œé¢: å¯¼èˆªç«™åå°ä¿¡æ¯.txt
 echo.
-echo ¸ĞĞ»Ê¹ÓÃ°®ËÑ×ÊÔ´½Ì³Ì ^(https://isoziyuan.com^)
+echo éƒ¨ç½²å®Œæˆï¼Œè¯·å¦¥å–„ä¿å­˜ä»¥ä¸Šè´¦å·ä¿¡æ¯ã€‚
 pause
 exit /b 0
+
+:save_credentials
+set "CRED_FILE=%USERPROFILE%\Desktop\å¯¼èˆªç«™åå°ä¿¡æ¯.txt"
+set "CRED_SITE_URL=%SITE_URL%"
+if not defined CRED_SITE_URL set "CRED_SITE_URL=éƒ¨ç½²å®Œæˆåè‡ªåŠ¨æ›´æ–°"
+> "%CRED_FILE%" echo ==============================
+>> "%CRED_FILE%" echo å¯¼èˆªç«™æ­å»ºä¿¡æ¯ - è¯·å¦¥å–„ä¿ç®¡
+>> "%CRED_FILE%" echo ==============================
+>> "%CRED_FILE%" echo å¯¼èˆªç«™ç½‘å€: %CRED_SITE_URL%
+>> "%CRED_FILE%" echo ç®¡ç†åå°:   %CRED_SITE_URL%/admin
+>> "%CRED_FILE%" echo ç®¡ç†å‘˜è´¦å·: admin
+>> "%CRED_FILE%" echo åå°å¯†ç :   %ADMIN_PASS%
+>> "%CRED_FILE%" echo æ­å»ºæ—¶é—´:   %date% %time%
+set "CRED_FILE="
+set "CRED_SITE_URL="
+goto :eof
+
+
+rem ---------- ä¸€é”®æ¸…é™¤ GitHub / Cloudflare ç™»å½•çŠ¶æ€ ----------
+:logout_all
+echo.
+echo æ­£åœ¨æ¸…é™¤ GitHub å’Œ Cloudflare ç™»å½•çŠ¶æ€...
+set "AUTH_DIR=%TEMP%\isoziyuan_logout_%RANDOM%_%RANDOM%"
+mkdir "%AUTH_DIR%" >nul 2>nul
+set "AUTH_JSON=%AUTH_DIR%\github-auth.json"
+set "AUTH_TARGETS=%AUTH_DIR%\github-accounts.txt"
+
+call gh auth status --json hosts > "%AUTH_JSON%" 2>nul
+powershell -NoProfile -Command "$data=ConvertFrom-Json -InputObject ([IO.File]::ReadAllText('%AUTH_JSON%')); $out=[Collections.Generic.List[string]]::new(); foreach($hostItem in $data.hosts.PSObject.Properties){foreach($account in @($hostItem.Value)){if($account.login){$out.Add($hostItem.Name+'|'+$account.login)}}}; [IO.File]::WriteAllLines('%AUTH_TARGETS%',$out)" >nul 2>nul
+if exist "%AUTH_TARGETS%" for /f "usebackq tokens=1,2 delims=|" %%h in ("%AUTH_TARGETS%") do call gh auth logout --hostname "%%h" --user "%%i" >nul 2>nul
+
+call npx wrangler logout >nul 2>nul
+
+if exist "%AUTH_DIR%" rmdir /s /q "%AUTH_DIR%"
+echo [OK] GitHub CLI å’Œ Cloudflare Wrangler ç™»å½•çŠ¶æ€å·²æ¸…é™¤ã€‚
+pause
+exit /b 0
+
+
+rem ---------- ä¸€é”®åˆ é™¤ GitHub / Cloudflare ä¸­çš„ isoziyuan ç›¸å…³èµ„æº ----------
+:cleanup_start
+echo.
+echo è¯·é€‰æ‹©åˆ é™¤èŒƒå›´:
+echo   [1] ä»…åˆ é™¤ Cloudflare é¡¹ç›®å’Œ D1 æ•°æ®åº“
+echo   [2] ä»…åˆ é™¤ GitHub ä»“åº“
+echo   [3] åŒæ—¶åˆ é™¤ Cloudflare å’Œ GitHub
+choice /c 123 /n /m "è¯·é€‰æ‹© [1/2/3]: "
+if errorlevel 3 goto cleanup_scope_both
+if errorlevel 2 goto cleanup_scope_github
+set "CLEAN_GH=0"
+set "CLEAN_CF=1"
+set "CLEAN_SCOPE_TEXT=Cloudflare"
+goto cleanup_auth
+
+:cleanup_scope_github
+set "CLEAN_GH=1"
+set "CLEAN_CF=0"
+set "CLEAN_SCOPE_TEXT=GitHub"
+goto cleanup_auth
+
+:cleanup_scope_both
+set "CLEAN_GH=1"
+set "CLEAN_CF=1"
+set "CLEAN_SCOPE_TEXT=Cloudflare å’Œ GitHub"
+
+:cleanup_auth
+echo.
+echo æ­£åœ¨æ‰«æ %CLEAN_SCOPE_TEXT% ä¸­çš„ isoziyuan èµ„æº...
+
+if "%CLEAN_GH%"=="0" goto cleanup_cf_check
+gh auth status >nul 2>nul
+if errorlevel 1 goto cleanup_gh_login
+goto cleanup_cf_check
+
+:cleanup_gh_login
+echo [æˆæƒ] è¯·å…ˆç™»å½• GitHub ...
+call gh auth login --hostname github.com --git-protocol https --web --clipboard
+if errorlevel 1 goto cleanup_auth_failed
+
+:cleanup_cf_check
+if "%CLEAN_CF%"=="0" goto cleanup_scan
+call :check_cf_auth
+if not "%CF_AUTH_OK%"=="1" goto cleanup_cf_login
+goto cleanup_scan
+
+:cleanup_cf_login
+echo [æˆæƒ] è¯·å…ˆç™»å½• Cloudflare ...
+call npx wrangler login
+call :check_cf_auth
+if not "%CF_AUTH_OK%"=="1" goto cleanup_auth_failed
+
+:cleanup_scan
+set "CLEAN_DIR=%TEMP%\isoziyuan_cleanup_%RANDOM%_%RANDOM%"
+mkdir "%CLEAN_DIR%" >nul 2>nul
+set "GH_JSON=%CLEAN_DIR%\github.json"
+set "GH_TARGETS=%CLEAN_DIR%\github.txt"
+set "PAGES_JSON=%CLEAN_DIR%\pages.json"
+set "PAGES_TARGETS=%CLEAN_DIR%\pages.txt"
+set "D1_JSON=%CLEAN_DIR%\d1.json"
+set "D1_TARGETS=%CLEAN_DIR%\d1.txt"
+
+if "%CLEAN_GH%"=="0" goto cleanup_scan_cloudflare
+set "GH_USER="
+for /f "usebackq delims=" %%u in (`gh api user -q .login 2^>nul`) do set "GH_USER=%%u"
+if not defined GH_USER goto cleanup_scan_failed
+call gh repo list "%GH_USER%" --limit 1000 --json nameWithOwner > "%GH_JSON%" 2>nul
+if errorlevel 1 goto cleanup_scan_failed
+powershell -NoProfile -Command "$data=ConvertFrom-Json -InputObject ([IO.File]::ReadAllText('%GH_JSON%')); $out=[Collections.Generic.List[string]]::new(); foreach($r in @($data)){if($r.nameWithOwner.IndexOf('isoziyuan',[StringComparison]::OrdinalIgnoreCase) -ge 0){$out.Add($r.nameWithOwner)}}; [IO.File]::WriteAllLines('%GH_TARGETS%',$out)" >nul 2>nul
+
+:cleanup_scan_cloudflare
+if "%CLEAN_CF%"=="0" goto cleanup_count_targets
+call npx wrangler pages project list --json > "%PAGES_JSON%" 2>nul
+if errorlevel 1 goto cleanup_scan_failed
+powershell -NoProfile -Command "$data=ConvertFrom-Json -InputObject ([IO.File]::ReadAllText('%PAGES_JSON%')); $out=[Collections.Generic.List[string]]::new(); foreach($p in @($data)){$name=$p.name; if(-not $name){$name=$p.project_name}; if($name -and $name.IndexOf('isoziyuan',[StringComparison]::OrdinalIgnoreCase) -ge 0){$out.Add($name)}}; [IO.File]::WriteAllLines('%PAGES_TARGETS%',$out)" >nul 2>nul
+
+call npx wrangler d1 list --json > "%D1_JSON%" 2>nul
+if errorlevel 1 goto cleanup_scan_failed
+powershell -NoProfile -Command "$data=ConvertFrom-Json -InputObject ([IO.File]::ReadAllText('%D1_JSON%')); $out=[Collections.Generic.List[string]]::new(); foreach($d in @($data)){if($d.name.IndexOf('isoziyuan',[StringComparison]::OrdinalIgnoreCase) -ge 0){$out.Add($d.name)}}; [IO.File]::WriteAllLines('%D1_TARGETS%',$out)" >nul 2>nul
+
+:cleanup_count_targets
+set GH_COUNT=0
+set PAGES_COUNT=0
+set D1_COUNT=0
+if exist "%GH_TARGETS%" for /f "usebackq delims=" %%r in ("%GH_TARGETS%") do set /a GH_COUNT+=1
+if exist "%PAGES_TARGETS%" for /f "usebackq delims=" %%p in ("%PAGES_TARGETS%") do set /a PAGES_COUNT+=1
+if exist "%D1_TARGETS%" for /f "usebackq delims=" %%d in ("%D1_TARGETS%") do set /a D1_COUNT+=1
+
+echo.
+echo æ‰¾åˆ°: GitHub %GH_COUNT% ä¸ªï¼ŒPages %PAGES_COUNT% ä¸ªï¼ŒD1 %D1_COUNT% ä¸ªã€‚
+
+if "%GH_COUNT%"=="0" if "%PAGES_COUNT%"=="0" if "%D1_COUNT%"=="0" goto cleanup_nothing
+choice /c YN /n /m "ç¡®è®¤åˆ é™¤ %CLEAN_SCOPE_TEXT% ä¸­çš„å…¨éƒ¨ isoziyuan èµ„æº? [Y/N]: "
+if errorlevel 2 goto cleanup_cancel
+
+if "%GH_COUNT%"=="0" goto cleanup_delete_pages
+echo.
+echo [GitHub] æ­£åœ¨ç”³è¯·åˆ é™¤ä»“åº“æ‰€éœ€çš„ delete_repo æƒé™ ...
+call gh auth refresh --hostname github.com --scopes delete_repo
+if errorlevel 1 goto cleanup_delete_failed
+for /f "usebackq delims=" %%r in ("%GH_TARGETS%") do call gh repo delete "%%r" --yes
+if errorlevel 1 goto cleanup_delete_failed
+
+:cleanup_delete_pages
+if "%PAGES_COUNT%"=="0" goto cleanup_delete_d1
+echo.
+echo [Cloudflare] æ­£åœ¨åˆ é™¤ Pages é¡¹ç›® ...
+for /f "usebackq delims=" %%p in ("%PAGES_TARGETS%") do call npx wrangler pages project delete "%%p" --yes
+if errorlevel 1 goto cleanup_delete_failed
+
+:cleanup_delete_d1
+if "%D1_COUNT%"=="0" goto cleanup_done
+echo.
+echo [Cloudflare] æ­£åœ¨åˆ é™¤ D1 æ•°æ®åº“ ...
+for /f "usebackq delims=" %%d in ("%D1_TARGETS%") do call npx wrangler d1 delete "%%d" --cwd "%CLEAN_DIR%" --skip-confirmation
+if errorlevel 1 goto cleanup_delete_failed
+
+:cleanup_done
+echo.
+echo [OK] æ‰€æœ‰æ‰«æåˆ°çš„ isoziyuan è¿œç¨‹èµ„æºå·²åˆ é™¤ã€‚
+if exist "%CLEAN_DIR%" rmdir /s /q "%CLEAN_DIR%"
+pause
+exit /b 0
+
+:cleanup_nothing
+echo [OK] æ²¡æœ‰å‘ç°åç§°åŒ…å« isoziyuan çš„è¿œç¨‹èµ„æºã€‚
+if exist "%CLEAN_DIR%" rmdir /s /q "%CLEAN_DIR%"
+pause
+exit /b 0
+
+:cleanup_cancel
+if exist "%CLEAN_DIR%" rmdir /s /q "%CLEAN_DIR%"
+exit /b 0
+
+:cleanup_auth_failed
+echo [X] GitHub æˆ– Cloudflare æˆæƒå¤±è´¥ï¼Œæœªåˆ é™¤ä»»ä½•èµ„æºã€‚
+pause
+exit /b 1
+
+:cleanup_scan_failed
+echo [X] è¿œç¨‹èµ„æºæ‰«æå¤±è´¥ï¼Œæœªåˆ é™¤ä»»ä½•èµ„æºã€‚
+if defined CLEAN_DIR if exist "%CLEAN_DIR%" rmdir /s /q "%CLEAN_DIR%"
+pause
+exit /b 1
+
+:cleanup_delete_failed
+echo [X] åˆ é™¤è¿‡ç¨‹ä¸­æœ‰å‘½ä»¤å¤±è´¥ï¼Œè¯·æŸ¥çœ‹ä¸Šæ–¹è¾“å‡ºå¹¶é‡æ–°è¿è¡Œæ¸…ç†æ¨¡å¼ã€‚
+if defined CLEAN_DIR if exist "%CLEAN_DIR%" rmdir /s /q "%CLEAN_DIR%"
+pause
+exit /b 1
+
+
+rem ---------- ç»Ÿä¸€å¤±è´¥å‡ºå£: å±•ç¤ºåŸå›  + æ”¯æŒä¸€é”®é‡æ–°å¼€å§‹ ----------
+:fail_restart
+echo.
+echo ==================================================
+echo   [X] æµç¨‹ä¸­æ–­åŸå› : %FAIL_REASON%
+echo   å…·ä½“æ’æŸ¥å»ºè®®è§ä¸Šæ–¹çº¢è‰² [X] è¾“å‡º, å·²å®Œæˆçš„æ­¥éª¤é‡è·‘æ—¶ä¼šè‡ªåŠ¨è·³è¿‡ã€‚
+echo ==================================================
+echo.
+pause
+choice /c YN /m "æ˜¯å¦ç«‹å³é‡æ–°è¿è¡Œæœ¬è„šæœ¬? [Y] é‡æ–°å¼€å§‹ / [N] é€€å‡º: "
+if errorlevel 2 exit /b 1
+echo.
+echo æ­£åœ¨é‡æ–°å¯åŠ¨è„šæœ¬...
+"%~f0"
+exit /b 1
+
