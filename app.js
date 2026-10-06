@@ -1,16 +1,6 @@
 let navData = [];
 let contact = defaultContact();
-let activeCategory = '';
 const safeUrl = (value) => { try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : '#'; } catch { return '#'; } };
-function renderFilters() {
-  const filters = document.getElementById('category-filters');
-  filters.innerHTML = [{ id: '', name: '全部服务' }, ...navData].map(cat => `<button type="button" data-category="${escapeHtml(cat.id)}" aria-pressed="${activeCategory === cat.id}">${escapeHtml(cat.name)}</button>`).join('');
-  filters.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
-    activeCategory = button.dataset.category;
-    renderFilters();
-    renderContent(document.getElementById('search-input').value);
-  }));
-}
 
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[char]));
@@ -42,9 +32,8 @@ function renderSidebar() {
     </a>
   `).join('');
   container.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
-    activeCategory = '';
     document.getElementById('search-input').value = '';
-    renderFilters(); renderContent();
+    renderContent();
     document.getElementById('sidebar').classList.remove('open');
   }));
 }
@@ -57,7 +46,6 @@ function renderContent(filterText = '') {
   let totalVisible = 0;
 
   const html = navData.map(cat => {
-    if (activeCategory && cat.id !== activeCategory) return '';
     const matchedItems = cat.items.filter(item => {
       if (!term) return true;
       const matchName = item.name.toLowerCase().includes(term);
@@ -109,8 +97,6 @@ function renderContent(filterText = '') {
 
   container.innerHTML = html;
   emptyState.style.display = totalVisible === 0 ? 'block' : 'none';
-  document.getElementById('results-count').textContent = `显示 ${totalVisible} 个服务${term ? ' · 搜索结果' : ''}`;
-  document.getElementById('reset-search').hidden = !term && !activeCategory;
 }
 
 // 主题切换
@@ -142,9 +128,6 @@ function initSearch() {
     renderContent(e.target.value);
   });
 
-  document.getElementById('reset-search').addEventListener('click', () => {
-    activeCategory = ''; searchInput.value = ''; renderFilters(); renderContent(); searchInput.focus();
-  });
   // 按 '/' 键聚焦搜索框
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement !== searchInput) {
@@ -231,7 +214,7 @@ function initMobileBottomNav() {
     button.addEventListener('click', () => {
       const action = button.dataset.mobileAction;
       document.querySelectorAll('.bottom-nav-item').forEach((item) => item.classList.toggle('active', item === button));
-      if (action === 'home') { activeCategory = ''; searchInput.value = ''; renderFilters(); renderContent(); sidebar.classList.remove('open'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      if (action === 'home') { searchInput.value = ''; renderContent(); sidebar.classList.remove('open'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
       if (action === 'categories') { sidebar.classList.add('open'); }
       if (action === 'search') { sidebar.classList.remove('open'); searchInput.focus({ preventScroll: true }); searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
       if (action === 'contact') { sidebar.classList.remove('open'); modal.hidden = false; }
@@ -281,9 +264,6 @@ async function applyNavPayload(payload) {
   contact = normalizeContact(payload.contact);
   if (payload.site) applySiteConfig(payload.site);
   renderSidebar();
-  if (!navData.some(cat => cat.id === activeCategory)) activeCategory = '';
-  renderFilters();
-  document.getElementById('service-count').textContent = `${navData.reduce((sum, cat) => sum + cat.items.length, 0)} 个服务 / ${navData.length} 个分类`;
   const status = document.getElementById('load-status');
   status.hidden = !payload.fallback;
   status.textContent = payload.fallback ? '当前展示备用导航，实时配置暂不可用。联系方式请稍后重试。' : '';
@@ -352,7 +332,5 @@ fetchNavConfig()
     const status = document.getElementById('load-status');
     status.hidden = false;
     status.textContent = '导航暂时加载失败，请刷新重试。也可直接访问 teyir.com 主站。';
-    document.getElementById('results-count').textContent = '加载失败';
-    document.getElementById('service-count').textContent = '请稍后重试';
   });
 
