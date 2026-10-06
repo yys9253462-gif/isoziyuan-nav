@@ -140,9 +140,9 @@ export function normalizeNavData(input) {
 }
 
 const DEFAULT_SITE_CONFIG = {
-  siteName: "爱搜资源",
+  siteName: "AI理想网",
   siteSubtitle: "服务导航",
-  browserTitle: "服务导航 - 谷歌服务器专属工作台",
+  browserTitle: "AI理想网 · 自营服务导航",
 };
 
 export function normalizeSiteConfig(input) {

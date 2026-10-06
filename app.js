@@ -1,5 +1,17 @@
 let navData = [];
 let contact = defaultContact();
+let activeCategory = '';
+const safeUrl = (value) => { try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : '#'; } catch { return '#'; } };
+function renderFilters() {
+  const filters = document.getElementById('category-filters');
+  filters.innerHTML = [{ id: '', name: '全部服务' }, ...navData].map(cat => `<button type="button" data-category="${escapeHtml(cat.id)}" aria-pressed="${activeCategory === cat.id}">${escapeHtml(cat.name)}</button>`).join('');
+  filters.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
+    activeCategory = button.dataset.category;
+    renderFilters();
+    renderContent(document.getElementById('search-input').value);
+  }));
+}
+
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[char]));
 const safeColor = (value) => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : '#6366f1';
@@ -29,6 +41,12 @@ function renderSidebar() {
       <span>${escapeHtml(cat.name)}</span>
     </a>
   `).join('');
+  container.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+    activeCategory = '';
+    document.getElementById('search-input').value = '';
+    renderFilters(); renderContent();
+    document.getElementById('sidebar').classList.remove('open');
+  }));
 }
 
 // 渲染主列表
@@ -39,19 +57,20 @@ function renderContent(filterText = '') {
   let totalVisible = 0;
 
   const html = navData.map(cat => {
+    if (activeCategory && cat.id !== activeCategory) return '';
     const matchedItems = cat.items.filter(item => {
       if (!term) return true;
       const matchName = item.name.toLowerCase().includes(term);
       const matchDesc = item.desc.toLowerCase().includes(term);
       const matchTags = item.tags && item.tags.some(t => t.toLowerCase().includes(term));
-      return matchName || matchDesc || matchTags;
+      return matchName || matchDesc || matchTags || cat.name.toLowerCase().includes(term) || item.url.toLowerCase().includes(term);
     });
 
     if (matchedItems.length === 0) return '';
     totalVisible += matchedItems.length;
 
     const cardsHtml = matchedItems.map(item => `
-      <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="tool-card">
+      <a href="${escapeHtml(safeUrl(item.url))}" target="_blank" rel="noopener noreferrer" class="tool-card" aria-label="${escapeHtml(item.name)}（新窗口打开）">
         <div class="card-top">
           <div class="tool-avatar" style="background: ${safeColor(item.color)}">
             ${safeIcon(item.icon) ? `<img src="${escapeHtml(item.icon)}" alt="">` : escapeHtml(item.name.charAt(0))}
@@ -64,6 +83,7 @@ function renderContent(filterText = '') {
           </div>
         </div>
         <div class="tool-desc">${escapeHtml(item.desc)}</div>
+        <div class="tool-domain">${escapeHtml(new URL(safeUrl(item.url), location.origin).hostname)}</div>
         <div class="tool-footer">
           <div class="tag-list">
             ${(item.tags || []).map(tag => `<span class="tag-item">${escapeHtml(tag)}</span>`).join('')}
@@ -89,6 +109,8 @@ function renderContent(filterText = '') {
 
   container.innerHTML = html;
   emptyState.style.display = totalVisible === 0 ? 'block' : 'none';
+  document.getElementById('results-count').textContent = `显示 ${totalVisible} 个服务${term ? ' · 搜索结果' : ''}`;
+  document.getElementById('reset-search').hidden = !term && !activeCategory;
 }
 
 // 主题切换
@@ -120,6 +142,9 @@ function initSearch() {
     renderContent(e.target.value);
   });
 
+  document.getElementById('reset-search').addEventListener('click', () => {
+    activeCategory = ''; searchInput.value = ''; renderFilters(); renderContent(); searchInput.focus();
+  });
   // 按 '/' 键聚焦搜索框
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement !== searchInput) {
@@ -206,7 +231,7 @@ function initMobileBottomNav() {
     button.addEventListener('click', () => {
       const action = button.dataset.mobileAction;
       document.querySelectorAll('.bottom-nav-item').forEach((item) => item.classList.toggle('active', item === button));
-      if (action === 'home') { sidebar.classList.remove('open'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      if (action === 'home') { activeCategory = ''; searchInput.value = ''; renderFilters(); renderContent(); sidebar.classList.remove('open'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
       if (action === 'categories') { sidebar.classList.add('open'); }
       if (action === 'search') { sidebar.classList.remove('open'); searchInput.focus({ preventScroll: true }); searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
       if (action === 'contact') { sidebar.classList.remove('open'); modal.hidden = false; }
@@ -246,7 +271,8 @@ async function fetchNavConfig() {
     return { data: result.data, contact: result.contact, site: result.site };
   } catch (err) {
     const data = await fetch('data.json' + query, { cache: 'no-store' }).then(r => r.json());
-    return { data, contact: defaultContact(), site: null };
+    if (!Array.isArray(data)) throw new Error('备用导航格式无效');
+    return { data, contact: defaultContact(), site: null, fallback: true };
   }
 }
 
@@ -255,6 +281,12 @@ async function applyNavPayload(payload) {
   contact = normalizeContact(payload.contact);
   if (payload.site) applySiteConfig(payload.site);
   renderSidebar();
+  if (!navData.some(cat => cat.id === activeCategory)) activeCategory = '';
+  renderFilters();
+  document.getElementById('service-count').textContent = `${navData.reduce((sum, cat) => sum + cat.items.length, 0)} 个服务 / ${navData.length} 个分类`;
+  const status = document.getElementById('load-status');
+  status.hidden = !payload.fallback;
+  status.textContent = payload.fallback ? '当前展示备用导航，实时配置暂不可用。联系方式请稍后重试。' : '';
   const searchInput = document.getElementById('search-input');
   renderContent(searchInput ? searchInput.value : '');
   renderContact();
@@ -317,5 +349,10 @@ fetchNavConfig()
   .then(applyNavPayload)
   .catch(err => {
     console.error('加载配置失败:', err);
+    const status = document.getElementById('load-status');
+    status.hidden = false;
+    status.textContent = '导航暂时加载失败，请刷新重试。也可直接访问 teyir.com 主站。';
+    document.getElementById('results-count').textContent = '加载失败';
+    document.getElementById('service-count').textContent = '请稍后重试';
   });
 

@@ -582,6 +582,44 @@ body {
   .contact-card { padding: 24px 18px 18px; border-radius: 18px; }
 }
 
+/* 2026-10 首页信息层级与移动端优化 */
+.hero { padding: 4px 0 30px; }
+.hero-kicker { font-size: 12px; letter-spacing: .12em; color: var(--accent-3); margin-bottom: 14px; }
+.hero h1 { font-size: clamp(28px, 3.5vw, 46px); line-height: 1.25; letter-spacing: -.04em; }
+.hero h1 span { color: var(--badge-text); }
+.hero p { color: var(--text-muted); font-size: 14px; line-height: 1.8; margin: 16px 0; }
+.hero-meta { display: flex; gap: 18px; flex-wrap: wrap; color: var(--text-muted); font-size: 12px; }
+.category-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.category-filters button, #reset-search { border: 1px solid var(--border-color); border-radius: 10px; padding: 9px 13px; background: var(--tag-bg); color: var(--text-muted); font: inherit; font-size: 13px; cursor: pointer; }
+.category-filters button[aria-pressed="true"] { background: var(--badge-bg); color: var(--badge-text); border-color: var(--border-focus); }
+.results-bar { display: flex; align-items: center; justify-content: space-between; min-height: 36px; margin-bottom: 22px; font-size: 12px; color: var(--text-muted); }
+#reset-search { padding: 6px 10px; }
+.tool-domain { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; overflow-wrap: anywhere; }
+.tool-name { white-space: normal; line-height: 1.5; }
+.tool-name-row { align-items: flex-start; }
+.tool-desc { -webkit-line-clamp: 3; line-height: 1.75; }
+.tag-item { color: var(--text-muted); }
+.load-status { padding: 14px; margin-bottom: 20px; background: var(--badge-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-muted); font-size: 13px; line-height: 1.7; }
+:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 4px; }
+.no-script { position: fixed; bottom: 80px; padding: 20px; background: var(--bg-elevated); z-index: 90; }
+@media (min-width: 601px) and (max-width: 900px) { .tools-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  .header-bar { gap: 8px; padding: 8px; }
+  .header-actions { gap: 0; }
+  .search-box { min-width: 0; }
+  .search-input { font-size: 16px; padding-right: 12px; }
+  .shortcut-badge { display: none; }
+  .theme-toggle-btn, .mobile-menu-btn { min-width: 42px; min-height: 42px; justify-content: center; padding: 8px; }
+  .hero { padding: 4px 0 24px; }
+  .hero h1 span { display: block; }
+  .hero-meta { gap: 10px; }
+  .category-filters { gap: 6px; }
+  .category-filters button { padding: 10px 11px; font-size: 12px; }
+  .category-title { font-size: 18px; }
+  .tool-card { padding: 18px; }
+  .category-section { margin-bottom: 30px; }
+  .brand-title { font-size: 16px; }
+}
 /* ============ 动效降级 ============ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
