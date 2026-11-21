@@ -1,20 +1,240 @@
 [
-  {"id":"ai-services","name":"AI 平台与 API","icon":"Sparkles","items":[
-    {"id":"32a887d4-7f0a-4e2c-854f-040d4c1ab5a4","name":"Sub2API 智能中转站","desc":"统一管理模型 API、访问密钥与调用用量，为应用开发提供聚合接入入口。","url":"https://gpt.teyir.com/","tags":["API 网关","模型接入","用量管理"],"badge":"核心","color":"#0b7566","icon":""},
-    {"id":"agent2api-001","name":"Agent2API 模型网关","desc":"连接多种 AI 服务的兼容 API 网关，提供模型列表与统一调用入口。","url":"https://agent.isoziyuan.com/","tags":["API 网关","多平台","开发者"],"badge":"新增","color":"#149986","icon":""}
-  ]},
-  {"id":"tools-ecommerce","name":"商城与数字服务","icon":"Code2","items":[
-    {"id":"api-key-shop-001","name":"Sailyer AI 智能商城","desc":"ChatGPT Plus / Pro 代开、大模型 API 按天套餐、学生认证、高速节点与余额钱包一站自助办理。","url":"https://shop.ailxw.com/","tags":["智能商城","余额钱包","自动交付"],"badge":"旗舰","color":"#0b7566","icon":""},
-    {"id":"fec0af1a-a8c3-43f5-9c33-df1c836219df","name":"自营数字商城","desc":"浏览数字产品与会员服务，查看商品说明、购买入口及订单交付信息。","url":"https://teyir.com/shop/","tags":["数字产品","会员服务","订单交付"],"badge":"自营","color":"#c6862a","icon":""},
-    {"id":"sms-shop-001","name":"SMS 智能接码平台","desc":"按地区与服务选择短信接收项目，查看余额、号码和验证码记录。","url":"https://sms.teyir.com/","tags":["短信服务","地区选择","验证码"],"badge":"常用","color":"#0e7490","icon":""},
-    {"id":"ac1fd492-4dac-4008-8bdd-f17e6cb71149","name":"爱搜云盘","desc":"通过分享链接与取件码获取文件，集中管理资源分享和下载入口。","url":"https://pan.ailxw.com/","tags":["资源下载","取件码","文件分享"],"badge":"网盘","color":"#059669","icon":""}
-  ]},
-  {"id":"content-community","name":"内容与交流","icon":"MessageSquare","items":[
-    {"id":"98bc0727-498b-4a29-ba4d-81aba1aef23e","name":"爱搜资源主站","desc":"资源、文章与数字服务的综合门户，一站直达爱搜资源的主要内容。","url":"https://teyir.com/","tags":["官方主站","资源门户","服务入口"],"badge":"主站","color":"#1d4ed8","icon":""},
-    {"id":"a98e75ea-652e-4580-8995-7d11125904b8","name":"技术博客","desc":"阅读部署实践、工具教程与使用经验，快速找到可复用的操作指南。","url":"https://teyir.com/blog/","tags":["技术文章","工具教程","实践经验"],"badge":"精选","color":"#0284c7","icon":""},
-    {"id":"610762ef-dc54-4b56-a5af-009344cb6ab2","name":"资源交流社区","desc":"分享资源、交流工具使用经验，参与话题讨论与问题反馈。","url":"https://bbs.teyir.com/","tags":["讨论社区","资源分享","问题反馈"],"badge":"社区","color":"#d97706","icon":""}
-  ]},
-  {"id":"management","name":"管理工作台","icon":"Code2","items":[
-    {"id":"926f8c11-fac4-4262-a491-7916669805c2","name":"支付管理后台","desc":"站长使用的支付与订单管理入口，需要管理员账号登录；购买服务请前往商城。","url":"https://pay.teyir.com/","tags":["管理员","支付管理","需要登录"],"badge":"后台","color":"#b91c1c","icon":""}
-  ]}
+  {
+    "id": "ai-services",
+    "name": "AI 平台与 API",
+    "icon": "Sparkles",
+    "items": [
+      {
+        "id": "32a887d4-7f0a-4e2c-854f-040d4c1ab5a4",
+        "name": "Sub2API 智能中转站",
+        "desc": "统一管理模型 API、访问密钥与调用用量，为应用开发提供聚合接入入口。",
+        "url": "https://gpt.teyir.com/",
+        "tags": ["API 网关", "模型接入", "用量管理"],
+        "badge": "核心",
+        "color": "#0b7566",
+        "icon": ""
+      },
+      {
+        "id": "new-api-ailxw-001",
+        "name": "New API 大模型聚合站",
+        "desc": "多模型统一接口聚合分发平台，支持主流大模型密钥管理与额度计费。",
+        "url": "https://api.ailxw.com/",
+        "tags": ["New API", "聚合接口", "开发者"],
+        "badge": "新增",
+        "color": "#149986",
+        "icon": ""
+      },
+      {
+        "id": "agent2api-001",
+        "name": "Agent2API 模型网关",
+        "desc": "连接多种 AI 服务的兼容 API 网关，提供模型列表与统一调用入口。",
+        "url": "https://agent.isoziyuan.com/",
+        "tags": ["API 网关", "多平台", "开发者"],
+        "badge": "网关",
+        "color": "#0f766e",
+        "icon": ""
+      }
+    ]
+  },
+  {
+    "id": "tools-ecommerce",
+    "name": "商城与数字服务",
+    "icon": "Code2",
+    "items": [
+      {
+        "id": "api-key-shop-001",
+        "name": "Sailyer AI 智能商城",
+        "desc": "ChatGPT Plus / Pro 代开、大模型 API 按天套餐、学生认证、高速节点与余额钱包一站自助办理。",
+        "url": "https://shop.ailxw.com/",
+        "tags": ["智能商城", "余额钱包", "自动交付"],
+        "badge": "旗舰",
+        "color": "#0b7566",
+        "icon": ""
+      },
+      {
+        "id": "fec0af1a-a8c3-43f5-9c33-df1c836219df",
+        "name": "自营数字商城",
+        "desc": "浏览数字产品与会员服务，查看商品说明、购买入口及订单交付信息。",
+        "url": "https://teyir.com/shop/",
+        "tags": ["数字产品", "会员服务", "订单交付"],
+        "badge": "自营",
+        "color": "#c6862a",
+        "icon": ""
+      },
+      {
+        "id": "sms-shop-001",
+        "name": "SMS 智能接码平台",
+        "desc": "按地区与服务选择短信接收项目，支持在线充值、即时取号与验证码记录查询。",
+        "url": "https://sms.teyir.com/",
+        "tags": ["短信接码", "多国号码", "验证码"],
+        "badge": "常用",
+        "color": "#0e7490",
+        "icon": ""
+      },
+      {
+        "id": "appflare-cf-001",
+        "name": "AppFlare 应用平台",
+        "desc": "在自己的 Cloudflare 账户里一键部署与管理精选自托管应用，免服务器零运维。",
+        "url": "https://cf.hejige.com/",
+        "tags": ["Cloudflare", "一键部署", "应用市场"],
+        "badge": "新增",
+        "color": "#d97706",
+        "icon": ""
+      },
+      {
+        "id": "totp-tool-001",
+        "name": "2FA 在线动态验证码",
+        "desc": "输入 32 位 TOTP 密钥实时生成 6 位动态验证码，纯浏览器本地计算不上传服务器。",
+        "url": "https://shop.ailxw.com/totp/",
+        "tags": ["2FA 工具", "本地安全", "验证码"],
+        "badge": "工具",
+        "color": "#047857",
+        "icon": ""
+      },
+      {
+        "id": "cursor-pay-001",
+        "name": "Cursor 订阅支付工具",
+        "desc": "自助生成与管理 Cursor 订阅支付链接，便捷完成开发工具会员开通。",
+        "url": "https://cursor.teyir.com/",
+        "tags": ["Cursor", "订阅支付", "开发工具"],
+        "badge": "订阅",
+        "color": "#1d4ed8",
+        "icon": ""
+      },
+      {
+        "id": "xgift-redeem-001",
+        "name": "XGift 赠送资格检测",
+        "desc": "在线检测账号赠送资格与自助卡密兑换，快速核验权益状态。",
+        "url": "https://xg.teyir.com/",
+        "tags": ["资格检测", "自助兑换", "工具"],
+        "badge": "兑换",
+        "color": "#0369a1",
+        "icon": ""
+      },
+      {
+        "id": "ac1fd492-4dac-4008-8bdd-f17e6cb71149",
+        "name": "爱搜云盘",
+        "desc": "通过分享链接与 5 位取件码高速提取文件，集中管理资源分享与下载入口。",
+        "url": "https://pan.ailxw.com/",
+        "tags": ["资源下载", "取件码", "文件分享"],
+        "badge": "网盘",
+        "color": "#059669",
+        "icon": ""
+      }
+    ]
+  },
+  {
+    "id": "content-community",
+    "name": "内容与交流",
+    "icon": "MessageSquare",
+    "items": [
+      {
+        "id": "98bc0727-498b-4a29-ba4d-81aba1aef23e",
+        "name": "Teyir 科技博客主站",
+        "desc": "深度部署教程、AI 实战手册、服务器架构与效率工具库的官方内容主站。",
+        "url": "https://teyir.com/",
+        "tags": ["官方主站", "技术教程", "干货手册"],
+        "badge": "主站",
+        "color": "#0b7566",
+        "icon": ""
+      },
+      {
+        "id": "ucard-guide-001",
+        "name": "Teyir U卡指南",
+        "desc": "海外虚拟卡与 U 卡实测资料库，涵盖开卡成本、费率对比与真实消费评价。",
+        "url": "https://card.hejige.com/",
+        "tags": ["U卡指南", "海外支付", "真实评测"],
+        "badge": "精选",
+        "color": "#b45309",
+        "icon": ""
+      },
+      {
+        "id": "blog-u88b-001",
+        "name": "Teyir 极客博客（静态版）",
+        "desc": "托管在边缘网络的轻量极客博客，记录建站折腾笔记与独立开发实战。",
+        "url": "https://blog.u88b.com/",
+        "tags": ["极客博客", "折腾记录", "技术文章"],
+        "badge": "博客",
+        "color": "#0284c7",
+        "icon": ""
+      },
+      {
+        "id": "610762ef-dc54-4b56-a5af-009344cb6ab2",
+        "name": "资源交流社区",
+        "desc": "分享资源、拼车交流、脚本工具讨论与问题求助的站内互动社区。",
+        "url": "https://bbs.teyir.com/",
+        "tags": ["讨论社区", "资源分享", "求助交流"],
+        "badge": "社区",
+        "color": "#d97706",
+        "icon": ""
+      }
+    ]
+  },
+  {
+    "id": "management",
+    "name": "管理工作台",
+    "icon": "Code2",
+    "items": [
+      {
+        "id": "926f8c11-fac4-4262-a491-7916669805c2",
+        "name": "支付管理后台",
+        "desc": "站长专用的支付通道与订单管理控制台，需要管理员密码与人机验证登录。",
+        "url": "https://pay.teyir.com/",
+        "tags": ["支付管理", "订单台", "管理员"],
+        "badge": "后台",
+        "color": "#b91c1c",
+        "icon": ""
+      },
+      {
+        "id": "panel-teyir-001",
+        "name": "TEYIR 节点运维面板",
+        "desc": "高速节点集群巡检、订阅分发与商城交付对接运维控制台。",
+        "url": "https://panel.teyir.com/",
+        "tags": ["节点运维", "订阅分发", "管理员"],
+        "badge": "后台",
+        "color": "#0f766e",
+        "icon": ""
+      },
+      {
+        "id": "plus-u88b-001",
+        "name": "Plus 运营控制台",
+        "desc": "ChatGPT Plus / Pro 代开业务、卡密库存与任务状态管理后台。",
+        "url": "https://plus.u88b.com/",
+        "tags": ["代开运营", "任务管理", "管理员"],
+        "badge": "后台",
+        "color": "#1e40af",
+        "icon": ""
+      },
+      {
+        "id": "flow-u88b-001",
+        "name": "Teyir 视频台",
+        "desc": "Flow2API 视频生成网关管理与调用后台，需管理员账号登录。",
+        "url": "https://flow.u88b.com/",
+        "tags": ["视频生成", "Flow2API", "管理员"],
+        "badge": "后台",
+        "color": "#7c3aed",
+        "icon": ""
+      },
+      {
+        "id": "kiro-ailxw-001",
+        "name": "Magpie Kiro 网关后台",
+        "desc": "Kiro 模型上游账号池、密钥限流与路由监控后台（基础鉴权保护）。",
+        "url": "https://kiro.ailxw.com/",
+        "tags": ["Magpie", "Kiro", "管理员"],
+        "badge": "后台",
+        "color": "#334155",
+        "icon": ""
+      },
+      {
+        "id": "jio-u88b-001",
+        "name": "JioFarm 管理面板",
+        "desc": "瑞典业务机 JioFarm 自动化任务与资源池管理控制台。",
+        "url": "https://jio.u88b.com/",
+        "tags": ["JioFarm", "运维面板", "管理员"],
+        "badge": "后台",
+        "color": "#475569",
+        "icon": ""
+      }
+    ]
+  }
 ]
