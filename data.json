@@ -1,20 +1,20 @@
 [
   {"id":"ai-services","name":"AI 平台与 API","icon":"Sparkles","items":[
-    {"id":"32a887d4-7f0a-4e2c-854f-040d4c1ab5a4","name":"Sub2API 智能中转站","desc":"统一管理模型 API、访问密钥与调用用量，为应用开发提供聚合接入入口。","url":"https://gpt.teyir.com/","tags":["API 网关","模型接入","用量管理"],"badge":"核心","color":"#6366f1","icon":""},
-    {"id":"agent2api-001","name":"Agent2API 模型网关","desc":"连接多种 AI 服务的兼容 API 网关，提供模型列表与统一调用入口。","url":"https://agent.isoziyuan.com/","tags":["API 网关","多平台","开发者"],"badge":"新增","color":"#8b5cf6","icon":""}
+    {"id":"32a887d4-7f0a-4e2c-854f-040d4c1ab5a4","name":"Sub2API 智能中转站","desc":"统一管理模型 API、访问密钥与调用用量，为应用开发提供聚合接入入口。","url":"https://gpt.teyir.com/","tags":["API 网关","模型接入","用量管理"],"badge":"核心","color":"#0b7566","icon":""},
+    {"id":"agent2api-001","name":"Agent2API 模型网关","desc":"连接多种 AI 服务的兼容 API 网关，提供模型列表与统一调用入口。","url":"https://agent.isoziyuan.com/","tags":["API 网关","多平台","开发者"],"badge":"新增","color":"#149986","icon":""}
   ]},
   {"id":"tools-ecommerce","name":"商城与数字服务","icon":"Code2","items":[
-    {"id":"fec0af1a-a8c3-43f5-9c33-df1c836219df","name":"自营数字商城","desc":"浏览数字产品与会员服务，查看商品说明、购买入口及订单交付信息。","url":"https://teyir.com/shop/","tags":["数字产品","会员服务","订单交付"],"badge":"自营","color":"#f59e0b","icon":""},
-    {"id":"api-key-shop-001","name":"API Key 商城","desc":"选购大模型 API 接入服务，查看套餐、额度说明与使用指南。","url":"https://shop.ailxw.com/","tags":["API Key","模型服务","套餐"],"badge":"新增","color":"#2563eb","icon":""},
-    {"id":"sms-shop-001","name":"SMS 智能接码平台","desc":"按地区与服务选择短信接收项目，查看余额、号码和验证码记录。","url":"https://sms.teyir.com/","tags":["短信服务","地区选择","验证码"],"badge":"常用","color":"#06b6d4","icon":""},
+    {"id":"api-key-shop-001","name":"Sailyer AI 智能商城","desc":"ChatGPT Plus / Pro 代开、大模型 API 按天套餐、学生认证、高速节点与余额钱包一站自助办理。","url":"https://shop.ailxw.com/","tags":["智能商城","余额钱包","自动交付"],"badge":"旗舰","color":"#0b7566","icon":""},
+    {"id":"fec0af1a-a8c3-43f5-9c33-df1c836219df","name":"自营数字商城","desc":"浏览数字产品与会员服务，查看商品说明、购买入口及订单交付信息。","url":"https://teyir.com/shop/","tags":["数字产品","会员服务","订单交付"],"badge":"自营","color":"#c6862a","icon":""},
+    {"id":"sms-shop-001","name":"SMS 智能接码平台","desc":"按地区与服务选择短信接收项目，查看余额、号码和验证码记录。","url":"https://sms.teyir.com/","tags":["短信服务","地区选择","验证码"],"badge":"常用","color":"#0e7490","icon":""},
     {"id":"ac1fd492-4dac-4008-8bdd-f17e6cb71149","name":"爱搜云盘","desc":"通过分享链接与取件码获取文件，集中管理资源分享和下载入口。","url":"https://pan.ailxw.com/","tags":["资源下载","取件码","文件分享"],"badge":"网盘","color":"#059669","icon":""}
   ]},
   {"id":"content-community","name":"内容与交流","icon":"MessageSquare","items":[
-    {"id":"98bc0727-498b-4a29-ba4d-81aba1aef23e","name":"爱搜资源主站","desc":"资源、文章与数字服务的综合门户，一站直达爱搜资源的主要内容。","url":"https://teyir.com/","tags":["官方主站","资源门户","服务入口"],"badge":"主站","color":"#2563eb","icon":""},
-    {"id":"a98e75ea-652e-4580-8995-7d11125904b8","name":"技术博客","desc":"阅读部署实践、工具教程与使用经验，快速找到可复用的操作指南。","url":"https://teyir.com/blog/","tags":["技术文章","工具教程","实践经验"],"badge":"精选","color":"#0ea5e9","icon":""},
-    {"id":"610762ef-dc54-4b56-a5af-009344cb6ab2","name":"资源交流社区","desc":"分享资源、交流工具使用经验，参与话题讨论与问题反馈。","url":"https://bbs.teyir.com/","tags":["讨论社区","资源分享","问题反馈"],"badge":"社区","color":"#f97316","icon":""}
+    {"id":"98bc0727-498b-4a29-ba4d-81aba1aef23e","name":"爱搜资源主站","desc":"资源、文章与数字服务的综合门户，一站直达爱搜资源的主要内容。","url":"https://teyir.com/","tags":["官方主站","资源门户","服务入口"],"badge":"主站","color":"#1d4ed8","icon":""},
+    {"id":"a98e75ea-652e-4580-8995-7d11125904b8","name":"技术博客","desc":"阅读部署实践、工具教程与使用经验，快速找到可复用的操作指南。","url":"https://teyir.com/blog/","tags":["技术文章","工具教程","实践经验"],"badge":"精选","color":"#0284c7","icon":""},
+    {"id":"610762ef-dc54-4b56-a5af-009344cb6ab2","name":"资源交流社区","desc":"分享资源、交流工具使用经验，参与话题讨论与问题反馈。","url":"https://bbs.teyir.com/","tags":["讨论社区","资源分享","问题反馈"],"badge":"社区","color":"#d97706","icon":""}
   ]},
   {"id":"management","name":"管理工作台","icon":"Code2","items":[
-    {"id":"926f8c11-fac4-4262-a491-7916669805c2","name":"支付管理后台","desc":"站长使用的支付与订单管理入口，需要管理员账号登录；购买服务请前往商城。","url":"https://pay.teyir.com/","tags":["管理员","支付管理","需要登录"],"badge":"后台","color":"#ef4444","icon":""}
+    {"id":"926f8c11-fac4-4262-a491-7916669805c2","name":"支付管理后台","desc":"站长使用的支付与订单管理入口，需要管理员账号登录；购买服务请前往商城。","url":"https://pay.teyir.com/","tags":["管理员","支付管理","需要登录"],"badge":"后台","color":"#b91c1c","icon":""}
   ]}
 ]
